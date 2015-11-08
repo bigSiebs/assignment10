@@ -11,15 +11,33 @@
         }
         
         if ($path_parts['filename'] == "top-10") {
-            print '<li class="activePage">Display Tables</li>';
+            print '<li class="activePage">The Top 10</li>';
         } else {
-            print '<li><a href="tables.php">Display Tables</a></li>';
+            print '<li><a href="tables.php">The Top 10</a></li>';
         }
         
         if ($path_parts['filename'] == "not-10") {
-            
+            print '<li class="activePage">The Others</li>';
         } else {
-            
+            print '<li><a href="tables.php">The Others</a></li>';
+        }
+        
+        if ($path_parts['filename'] == "form") {
+            print '<li class="activePage">Suggest an Activity!</li>';
+        } else {
+            print '<li><a href="form.php">Suggest an Activity!</a></li>';
+        }
+        
+        if ($path_parts['filename'] == "review") {
+            print '<li class="activePage">Review an Activity</li>';
+        } else {
+            print '<li><a href="review.php">Review an Activity</a></li>';
+        }
+        
+        if ($path_parts['filename'] == "about") {
+            print '<li class="activePage">About the List</li>';
+        } else {
+            print '<li><a href="about.php">About the List</a></li>';
         }
         
         ?>

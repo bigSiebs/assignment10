@@ -4,15 +4,16 @@ include "top.php";
     
 print "<article>";
 
-// SELECT according to $numberRecords and $startRecord
+// NEED TO ADD LIMIT CLAUSE
 $query = "SELECT fldName, fldOnCampus, fldTownName, fldState";
 $query .= " FROM tblActivities A";
 $query .= " INNER JOIN tblVotes V ON A.pmkActivityId = V.fnkActivityId";
 $query .= " INNER JOIN tblTowns T ON A.fnkTownId = T.pmkTownId";
+$query .= " WHERE fldApproved = 1";
 $query .= " GROUP BY A.fldName";
-$query .= " ORDER BY SUM(fldVote) DESC";
-$data = array(10);
-$val = array(0, 1, 0, 0);
+$query .= " ORDER BY SUM(fldVote) DESC LIMIT 10";
+$data = array();
+$val = array(1, 1, 0, 0);
 
 
 $test = $thisDatabaseReader->testquery($query, $data, $val[0], $val[1], $val[2], $val[3], false, false);
@@ -34,6 +35,7 @@ print '<tr>';
 // Get headings from first subarray (removes indexes with filter function)
 $fields = array_keys($info[0]);
 $headers = array_filter($fields, 'is_string'); // Picks up only str values
+
 // Print headings
 foreach ($headers as $head) {
     $camelCase = preg_split('/(?=[A-Z])/', substr($head, 3));

@@ -16,7 +16,7 @@ require_once('lib/custom-functions.php');
         <script src="//html5shim.googlecode.com/sin/trunk/html5.js"></script>
         <![endif]-->
 
-        <link rel="stylesheet" href="css/base.css" type="text/css" media="screen">
+        <link rel="stylesheet" href="css/styles.css" type="text/css" media="screen">
 
         <?php
         $debug = false;
@@ -128,6 +128,7 @@ require_once('lib/custom-functions.php');
     <!-- **********************     Body section      ********************** -->
     <?php
     print '<body id="' . $path_parts['filename'] . '">';
+    print '<div id="page">';
     include "header.php";
     include "nav.php";
     ?>
