@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS tblActivities(
     fnkTownId int(11) NOT NULL,
     fldDescription TEXT DEFAULT NULL,
     fnkSubmitNetId varchar(12) NOT NULL,
+    fldApproved tinyint(1) NOT NULL DEFAULT 0 CHECK (fldVote = 0 OR fldVote = 1),
     PRIMARY KEY(pmkActivityId)
 );
 

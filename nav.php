@@ -13,7 +13,7 @@
         if ($path_parts['filename'] == "top-10") {
             print '<li class="activePage">The Top 10</li>';
         } else {
-            print '<li><a href="tables.php">The Top 10</a></li>';
+            print '<li><a href="top-10.php">The Top 10</a></li>';
         }
         
         if ($path_parts['filename'] == "not-10") {

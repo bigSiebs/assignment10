@@ -91,3 +91,9 @@ footer {
     clear: both;
     text-align: center;
 }
+
+/* -------------- CLASSES --------------- */
+
+input.no-edit {
+    background-color: lightgray
+}

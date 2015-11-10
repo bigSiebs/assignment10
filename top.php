@@ -1,6 +1,7 @@
 <?php
 include "lib/constants.php";
 require_once('lib/custom-functions.php');
+require_once('lib/validation-functions.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
