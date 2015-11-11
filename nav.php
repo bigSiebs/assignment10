@@ -40,6 +40,14 @@
             print '<li><a href="about.php">About the List</a></li>';
         }
         
+        if (adminCheck($username)) {
+            if ($path_parts['filename'] == "admin") {
+                print '<li class="activePage">Admin</li>';
+            } else {
+                print '<li><a href="admin.php">Admin</a></li>';
+            }
+        }
+        
         ?>
     </ol>
 </nav>

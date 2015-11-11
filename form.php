@@ -28,7 +28,7 @@ $yourURL = $domain . $phpSelf;
 // Initialize variables one for each form element
 // in the order they appear on the form
 
-$username = htmlentities($_SERVER["REMOTE_USER"], ENT_QUOTES, "UTF-8");
+// $username initalized and sanitized in top.php
 $activityName = "";
 $category = "Select one";
 
@@ -151,6 +151,10 @@ if (isset($_POST['btnSubmit'])) {
             $query .= " fldName = ?,";
             $query .= " fldCategory = ?,";
             $query .= " fldOnCampus = ?,";
+            //if ($cost != "") {
+            //    $query .= "fldCost = ?";
+            //    $activityData [] = $cost;
+            //}
             $query .= " fnkTownId = 1"; //hard-coded to Burlington for now
             
             $activity = $thisDatabaseWriter->insert($query, $activityData, 0, 0, 0, 0, false, false);

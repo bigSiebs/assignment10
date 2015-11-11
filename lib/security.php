@@ -21,6 +21,7 @@ function securityCheck($path_parts, $yourURL, $form = false) {
     $whiteListPages[] = "index.php";
     $whiteListPages[] = "top-10.php";
     $whiteListPages[] = "form.php";
+    $whiteListPages[] = "admin.php";
 
     //add all the folders to this array
     $whiteListFolders = array();
@@ -89,6 +90,16 @@ function securityCheck($path_parts, $yourURL, $form = false) {
         $mailed = sendMail($to, $cc, $bcc, $from, $subject, $message);
 
     }
+    return $passed;
+}
+
+function adminCheck($user) {
+    $passed = true;
+    
+    if ($user != 'jsiebert' AND $user != 'aychu') {
+        $passed = false;
+    }
+    
     return $passed;
 }
 
