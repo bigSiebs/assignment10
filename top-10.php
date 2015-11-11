@@ -5,40 +5,28 @@ include "top.php";
 print "<article>";
 
 // Get activity ID
-if (isset($_GET['activity'])) {
-    $activityID = (int) $_GET['activity'];
-} else {
-    $activityID = "";
-}
-
-// Get vote
-if (isset($_GET['vote'])) {
-    $vote = (int) $_GET['vote'];
-    // Reset value if not valid
-    if (!($vote == -1 OR $vote == 1)) {
-        $vote = "";
+if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
+    if (isset($_POST['btnUpVote'])) {
+        $activityID = (int) $_POST['btnUpVote'];
+        $vote = 1;
+    } else {
+        $activityID = (int) $_POST['btnDownVote'];
+        $vote = -1;
     }
-} else {
-    $vote = "";
-}
 
-// If activity ID and vote are appended to URL
-if ($activityID AND $vote) {
     // Query database looking for activity ID
     $checkActivityQuery = "SELECT pmkActivityId";
     $checkActivityQuery .= " FROM tblActivities";
     $checkActivityQuery .= " WHERE pmkActivityId = ?";
     $checkActivityData = array($activityID);
-    
+
     $checkActivity = $thisDatabaseReader->select($checkActivityQuery, $checkActivityData, 1, 0, 0, 0, false, false);
-  
-    
+
+
     // Make sure array returned something; signals that activity ID is valid
     // If invalid, print error
     if (!$checkActivity) {
         print "<p>Invalid activity number.</p>";
-    
-        
     } else { // if valid
         // Query database for user/activity vote combo
         $checkVoteQuery = "SELECT fldVote";
@@ -46,39 +34,36 @@ if ($activityID AND $vote) {
         $checkVoteQuery .= " WHERE fnkActivityId = ? AND";
         $checkVoteQuery .= " fnkNetId = ?";
         $checkVoteData = array($activityID, $username); // username defined in top.php
-        
+
         $checkVote = $thisDatabaseReader->select($checkVoteQuery, $checkVoteData, 1, 1, 0, 0, false, false);
+        
+        $inserted = "";
+        $updated = "";
         
         if (!$checkVote) { // If vote doesn't exist
             // INSERT RECORD
             print "<p>TEST: Vote doesn't exist.</p>";
-            
+
             $insertQuery = "INSERT INTO tblVotes SET";
             $insertQuery .= " fnkNetId = ?,";
             $insertQuery .= " fnkActivityId = ?,";
             $insertQuery .= " fldVote = ?";
             $insertData = array($username, $activityID, $vote);
-            
+
             $inserted = $thisDatabaseWriter->insert($insertQuery, $insertData, 0, 0, 0, 0, false, false);
-            
+
             if ($inserted) {
-                    print "<p>Thanks for voting!</p>";
-                }
-            
+                print "<p>Thanks for voting!</p>";
+            }
         } else {
             // Check that voter won't exceed min/max
             print "<p>TEST: Vote exists.</p>";
             $newVote = $checkVote[0]['fldVote'] + $vote; // $checkVote should contain one value
-            
             // Check that new vote won't exceed 1 or fall below -1
             if ($newVote > 1) { // Vote exceeds max
                 print "<p>TEST: Vote exceeds max.</p>";
-        
-                
             } else if ($newVote < -1) { // Vote falls below min
                 print "<p>TEST: Vote falls below min.</p>";
-            
-                
             } else { // vote is valid
                 print "<p>TEST: New vote value is valid.</p>";
                 $updateQuery = " UPDATE tblVotes SET";
@@ -86,14 +71,14 @@ if ($activityID AND $vote) {
                 $updateQuery .= " WHERE fnkActivityId = ? AND";
                 $updateQuery .= " fnkNetId = ?";
                 $updateData = array($newVote, $activityID, $username);
-                
+
                 $updated = $thisDatabaseWriter->update($updateQuery, $updateData, 1, 1, 0, 0, false, false);
-                
-                if ($updated) {
-                    print "<p>Thanks for voting!</p>";
-                }
             }
         }
+    }
+
+    if ($inserted OR $updated) {
+        print "<p>Thanks for voting!</p>";
     }
 }
 
@@ -125,7 +110,6 @@ print '<tr>';
 // Get headings from first subarray (removes indexes with filter function)
 $fields = array_keys($info[0]);
 $headers = array_filter($fields, 'is_string'); // Picks up only str values
-
 // Print headings
 foreach ($headers as $head) {
     $camelCase = preg_split('/(?=[A-Z])/', substr($head, 3));
@@ -150,12 +134,27 @@ foreach ($info as $record) {
     foreach ($headers as $field) {
         print '<td>' . htmlentities($record[$field]) . '</td>';
     }
-    print '<td><a href="?activity=' . $record['pmkActivityId'];
-    print '&vote=1' . '">&#x25B2</a></td>';
-    
-    print '<td><a href="?activity=' . $record['pmkActivityId'];
-    print '&vote=-1' . '">&#x25BC</a></td>';
-    
+
+    print '<td>';
+    print '<form action="' . $phpSelf . '" method="post" ';
+    print 'id="frmUpVote' . $record['pmkActivityId'] . '">';
+    print '<fieldset class="vote-button">';
+    print '<input type="submit" id="btnUpVote' . $record['pmkActivityId'] . '" ';
+    print 'name="btnUpVote" value="' . $record['pmkActivityId'] . '" ';
+    print 'tabindex="100" class="up-vote">';
+    print '</fieldset>';
+    print '</form></td>';
+
+    print '<td>';
+    print '<form action="' . $phpSelf . '" method="post" ';
+    print 'id="frmDownVote' . $record['pmkActivityId'] . '">';
+    print '<fieldset class="vote-button">';
+    print '<input type="submit" id="btnDownVote' . $record['pmkActivityId'] . '" ';
+    print 'name="btnDownVote" value="' . $record['pmkActivityId'] . '" ';
+    print 'tabindex="110" class="down-vote">';
+    print '</fieldset>';
+    print '</form></td>';
+
     print '</tr>';
 }
 
