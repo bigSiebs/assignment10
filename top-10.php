@@ -7,12 +7,14 @@ print "<article>";
 // Get activity ID
 if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
     if (isset($_POST['btnUpVote'])) {
-        $activityID = (int) $_POST['btnUpVote'];
+        $activityID = (int) htmlentities($_POST["hidActivityId"], ENT_QUOTES, "UTF-8");
         $vote = 1;
     } else {
-        $activityID = (int) $_POST['btnDownVote'];
+        $activityID = (int) htmlentities($_POST["hidActivityId"], ENT_QUOTES, "UTF-8");
         $vote = -1;
     }
+    
+    print '<section>';
 
     // Query database looking for activity ID
     $checkActivityQuery = "SELECT pmkActivityId";
@@ -41,8 +43,6 @@ if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
         $updated = "";
         
         if (!$checkVote) { // If vote doesn't exist
-            // INSERT RECORD
-            print "<p>TEST: Vote doesn't exist.</p>";
 
             $insertQuery = "INSERT INTO tblVotes SET";
             $insertQuery .= " fnkNetId = ?,";
@@ -53,19 +53,19 @@ if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
             $inserted = $thisDatabaseWriter->insert($insertQuery, $insertData, 0, 0, 0, 0, false, false);
 
             if ($inserted) {
-                print "<p>Thanks for voting!</p>";
+                print "<p>Your vote has been tallied. Thanks for voting!</p>";
             }
+            
         } else {
             // Check that voter won't exceed min/max
-            print "<p>TEST: Vote exists.</p>";
             $newVote = $checkVote[0]['fldVote'] + $vote; // $checkVote should contain one value
+            
             // Check that new vote won't exceed 1 or fall below -1
             if ($newVote > 1) { // Vote exceeds max
-                print "<p>TEST: Vote exceeds max.</p>";
+                print "<p>Sorry, you cannot upvote this activity again.</p>";
             } else if ($newVote < -1) { // Vote falls below min
-                print "<p>TEST: Vote falls below min.</p>";
+                print "<p>Sorry, you cannot downvote this activity again.</p>";
             } else { // vote is valid
-                print "<p>TEST: New vote value is valid.</p>";
                 $updateQuery = " UPDATE tblVotes SET";
                 $updateQuery .= " fldVote = ?";
                 $updateQuery .= " WHERE fnkActivityId = ? AND";
@@ -73,12 +73,12 @@ if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
                 $updateData = array($newVote, $activityID, $username);
 
                 $updated = $thisDatabaseWriter->update($updateQuery, $updateData, 1, 1, 0, 0, false, false);
+                
+                if ($updated) {
+                    print "<p>Your vote has been changed. Thanks for voting!</p>";
+                }
             }
         }
-    }
-
-    if ($inserted OR $updated) {
-        print "<p>Thanks for voting!</p>";
     }
 }
 
@@ -153,9 +153,15 @@ foreach ($info as $record) {
     print '<td>';
     print '<form action="' . $phpSelf . '" method="post" ';
     print 'id="frmUpVote' . $record['pmkActivityId'] . '">';
+    
+    // Add hidden field to hold activity ID
     print '<fieldset class="vote-button">';
+    print '<input type="hidden" id="hidActivityId' . $record['pmkActivityId'] . '" ';
+    print 'name="hidActivityId" value="' . $record['pmkActivityId'] . '">';
+    
+    // Add button
     print '<input type="submit" id="btnUpVote' . $record['pmkActivityId'] . '" ';
-    print 'name="btnUpVote" value="' . $record['pmkActivityId'] . '" ';
+    print 'name="btnUpVote" value="&#x25B2" ';
     print 'tabindex="100" class="up-vote">';
     print '</fieldset>';
     print '</form></td>';
@@ -164,9 +170,15 @@ foreach ($info as $record) {
     print '<td>';
     print '<form action="' . $phpSelf . '" method="post" ';
     print 'id="frmDownVote' . $record['pmkActivityId'] . '">';
+    
+    // Add hidden field to hold activity ID
     print '<fieldset class="vote-button">';
+    print '<input type="hidden" id="hidActivityId' . $record['pmkActivityId'] . '" ';
+    print 'name="hidActivityId" value="' . $record['pmkActivityId'] . '">';
+    
+    // Add button
     print '<input type="submit" id="btnDownVote' . $record['pmkActivityId'] . '" ';
-    print 'name="btnDownVote" value="' . $record['pmkActivityId'] . '" ';
+    print 'name="btnDownVote" value="&#x25BC" ';
     print 'tabindex="110" class="down-vote">';
     print '</fieldset>';
     print '</form></td>';
