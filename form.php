@@ -30,6 +30,8 @@ $yourURL = $domain . $phpSelf;
 // If activity is included in URL, then the admin wants to edit a record
 // We need to get the record's info from the database
 
+$update = false;
+
 $activityID = -1;
 
 $user = $username;
