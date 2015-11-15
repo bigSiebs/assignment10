@@ -107,6 +107,11 @@ if ($debug) {
 print '<table>';
 print '<tr>';
 
+// If user is admin, print blank heading to offset for [Edit] column
+if (adminCheck($username)) {
+        print '<th></th>';
+    }
+
 // Get headings from first subarray (removes indexes with filter function)
 $fields = array_keys($info[0]);
 $headers = array_filter($fields, 'is_string'); // Picks up only str values
@@ -122,6 +127,8 @@ foreach ($headers as $head) {
 
     print '<th>' . $heading . '</th>';
 }
+
+// Print vote headings for all columns
 print "<th>Vote Up</th>";
 print "<th>Vote Down</th>";
 
@@ -130,11 +137,19 @@ print "</tr>";
 // For loop to print records
 foreach ($info as $record) {
     print '<tr>';
+    
+    // Make admin-only [Edit] column, which allows admin to edit records
+    if (adminCheck($username)) {
+        print '<td><a href="form.php?activity=' . $record['pmkActivityId'] . '">';
+        print '[Edit]</a></td>';
+    }
+    
     // Uses field names (AKA headers) as keys to pick from arrays
     foreach ($headers as $field) {
         print '<td>' . htmlentities($record[$field]) . '</td>';
     }
-
+    
+    // Add upvote form/button
     print '<td>';
     print '<form action="' . $phpSelf . '" method="post" ';
     print 'id="frmUpVote' . $record['pmkActivityId'] . '">';
@@ -145,6 +160,7 @@ foreach ($info as $record) {
     print '</fieldset>';
     print '</form></td>';
 
+    // Add downvote form/button
     print '<td>';
     print '<form action="' . $phpSelf . '" method="post" ';
     print 'id="frmDownVote' . $record['pmkActivityId'] . '">';
