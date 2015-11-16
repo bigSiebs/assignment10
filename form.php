@@ -41,12 +41,14 @@ $onCampus = false; // not checked
 
 $town = "";
 $state = "VT";
+$distance = 0;
 
 if (isset($_GET['activity']) AND adminCheck($username)) { // ADMINS ONLY
     $activityID = (int) $_GET['activity'];
 
     // Build query to get info from database
-    $query = "SELECT fldName, fldCategory, fldOnCampus, fnkSubmitNetId, fldTownName, fldState";
+    $query = "SELECT fldName, fldCategory, fldOnCampus, fnkSubmitNetId,";
+    $query .= " fldTownName, fldState, fldDistance";
     $query .= " FROM tblActivities";
     $query .= " INNER JOIN tblTowns ON pmkTownId = fnkTownId";
     $query .= " WHERE pmkActivityId = ?";
@@ -70,6 +72,7 @@ if (isset($_GET['activity']) AND adminCheck($username)) { // ADMINS ONLY
 
         $town = $info[0]['fldTownName'];
         $state = $info[0]['fldState'];
+        $distance = $info[0]['fldDistance'];
         
     }
 }
@@ -83,6 +86,7 @@ $userError = false;
 $activityNameError = false;
 $categoryError = false;
 $townError = false;
+$distanceError = false;
 
 // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
 //
@@ -119,8 +123,11 @@ if (isset($_POST['btnSubmit'])) {
     $activityID = (int) htmlentities($_POST["hidActivityId"], ENT_QUOTES, "UTF-8");
     if ($activityID > 0) {
         $update = true;
+    } else {
+        $update = false;
     }
     
+    $user = htmlentities($_POST['txtUsername'], ENT_QUOTES, "UTF-8");
     $activityData[] = $user;
 
     $activityName = htmlentities($_POST['txtActivityName'], ENT_QUOTES, "UTF-8");
@@ -142,6 +149,9 @@ if (isset($_POST['btnSubmit'])) {
 
     $state = $_POST['lstState'];
     $townData[] = $state;
+    
+    $distance = $_POST['txtDistance'];
+    $townData[] = $distance;
 
     // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
     //
@@ -175,6 +185,14 @@ if (isset($_POST['btnSubmit'])) {
         $errorMsg[] = "The town name appears to include invalid charaters.";
         $townError = true;
     }
+    
+    if ($distance == "") {
+        $errorMsg[] = "Please enter the town's distance from UVM.";
+        $distanceError = true;
+    } elseif (!verifyNumeric($distance)) {
+        $errorMsg[] = "The value entered for the distance must be strictly numeric.";
+        $distanceError = true;
+    }
 
     // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
     //
@@ -188,10 +206,39 @@ if (isset($_POST['btnSubmit'])) {
         // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
         //
         // SECTION 2e: Save data: Insert data into database   
+        $townSelectQuery = "SELECT pmkTownId";
+        $townSelectQuery .= " FROM tblTowns";
+        $townSelectQuery .= " WHERE fldTownName = ? AND";
+        $townSelectQuery .= " fldState = ?";
+        $townSelectData = array($town, $state);
+        
+        $townSelect = $thisDatabaseReader->select($townSelectQuery, $townSelectData,
+                1, 1, 0, 0, false, false);
+        
+        if($townSelect) { // If not empty, grab ID
+            $townID = $townSelect[0]['pmkTownId'];
+        
+            
+        } else {
+            $townInsertQuery = "INSERT INTO tblTowns SET";
+            $townInsertQuery .= " fldTownName = ?,";
+            $townInsertQuery .= " fldState = ?,";
+            $townInsertQuery .= " fldDistance = ?";
+            
+            $townInsert = $thisDatabaseWriter->insert($townInsertQuery, $townData,
+                    0, 0, 0, 0, false, false);
+            
+            if ($townInsert) {
+                $townID = $thisDatabaseWriter->lastInsert(); // keep after debug
+            }
+        }
+        
+        // Add pmkTownId for town to array
+        $activityData[] = $townID;
+
         // Get first line of query
         if ($update) {
             $query = "UPDATE tblActivities SET";
-            print "<p>updating.</p>";
         } else {
             $query = "INSERT INTO tblActivities SET";
         }
@@ -200,11 +247,11 @@ if (isset($_POST['btnSubmit'])) {
         $query .= " fldName = ?,";
         $query .= " fldCategory = ?,";
         $query .= " fldOnCampus = ?,";
+        $query .= " fnkTownId = ?";
         //if ($cost != "") {
         //    $query .= "fldCost = ?";
         //    $activityData [] = $cost;
         //}
-        $query .= " fnkTownId = 1"; //hard-coded to Burlington for now
         
         if ($update) { // IMPORTANT: do not forget to add this to UPDATE queries
             $query .= " WHERE pmkActivityId = ?";
@@ -215,9 +262,38 @@ if (isset($_POST['btnSubmit'])) {
             
         } else {
             $activity = $thisDatabaseWriter->insert($query, $activityData, 0, 0, 0, 0, false, false);
+            
+            // Need to create vote so that record can be ordered
+            $lastActivityID = $thisDatabaseWriter->lastInsert();
+            
+            // By default, vote score = 0
+            $voteInsertQuery = "INSERT INTO tblVotes SET";
+            $voteInsertQuery .= " fnkNetId = ?,";
+            $voteInsertQuery .= " fnkActivityId = ?";
+            $voteInsertData = array($user, $lastActivityID);
+            
+            $vote = $thisDatabaseWriter->insert($voteInsertQuery, $voteInsertData,
+                    0, 0, 0, 0, false, false);
         }
         
-        //$recordID = $thisDatabaseWriter->lastInsert();
+        // No matter what, check if user is in table already
+        $userSelectQuery = "SELECT pmkNetId";
+        $userSelectQuery .= " FROM tblAffiliates";
+        $userSelectQuery .= " WHERE pmkNetId = ?";
+        $userSelectData = array($user);
+        
+        $userSelect = $thisDatabaseReader->select($userSelectQuery, $userSelectData,
+                1, 0, 0, 0, false, false);
+        
+        if (!$userSelect) { // if user select query is empty
+            $userInsertQuery = "INSERT INTO tblAffiliates SET";
+            $userInsertQuery .= " pmkNetId = ?";
+            $userInsertData = array($user);
+            
+            $userInsert = $thisDatabaseWriter->insert($userInsertQuery, $userInsertData,
+                    0, 0, 0, 0, false, false);
+        }
+        
         // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
         //
         // SECTION 2f: Create message
@@ -329,7 +405,9 @@ if (isset($_POST['btnSubmit'])) {
                     <label for="txtUsername" class="required">NetID
                         <input type="text" id="txtUsername" name="txtUsername"
                                value="<?php print $user; ?>"
-                               tabindex="100" maxlength="45" readonly class="no-edit
+                               tabindex="100" maxlength="45"
+                               <?php if (!adminCheck($username)) print 'readonly'; ?>
+                               class="no-edit 
                                <?php if ($userError) print ' mistake'; ?>"
                                onfocus="this.select()"
                                autofocus>
@@ -344,9 +422,8 @@ if (isset($_POST['btnSubmit'])) {
                                autofocus>
                     </label>
 
-                    <fieldset class="listbox1">
-                        <label for="lstCategory">Category</label>
-                        <select id="lstCategory" name="lstCategory"
+                    <label for="lstCategory">Category</label>
+                    <select id="lstCategory" name="lstCategory"
                         <?php if ($categoryError) print 'class="mistake"'; ?>
                                 tabIndex="200">
                                     <?php
@@ -362,19 +439,18 @@ if (isset($_POST['btnSubmit'])) {
                                         print "\n";
                                     }
                                     ?>
-                        </select>
-                    </fieldset> <!-- end listbox1 -->
+                    </select>
 
-                    <fieldset class="checkbox">
-                        <legend></legend>
-                        <label><input type="checkbox" 
+                    <label><input type="checkbox" 
                                       id="chkOnCampus" 
                                       name="chkOnCampus" 
                                       value="On Campus"
                                       <?php if ($onCampus) print " checked "; ?>
                                       tabindex="300">Is this activity on campus?</label>
-                    </fieldset> <!-- end checkbox -->
-
+                </fieldset> <!-- end basic-info -->
+                
+                <fieldset class="location-info">
+                    <legend>Location Information</legend>
                     <label for="txtTown" class="required">Town
                         <input type="text" id="txtTown" name="txtTown"
                                value="<?php print $town; ?>"
@@ -400,8 +476,17 @@ if (isset($_POST['btnSubmit'])) {
                         }
                         ?>
                     </select>
+                    
+                    <label for="txtDistance" class="required">Distance from Burlington (in miles)
+                        <input type="text" id="txtDistance" name="txtDistance"
+                               value="<?php print $distance; ?>"
+                               tabindex="420" maxlength="255" 
+                               <?php if ($distanceError) print 'class="mistake"'; ?>
+                               onfocus="this.select()"
+                               autofocus>
+                    </label>
 
-                </fieldset> <!-- end basic-info -->
+                </fieldset> <!-- end location-info -->
 
                 <fieldset class="buttons">
                     <legend></legend>

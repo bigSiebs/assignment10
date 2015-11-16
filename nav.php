@@ -28,12 +28,6 @@
             print '<li><a href="form.php">Suggest an Activity!</a></li>';
         }
         
-        if ($path_parts['filename'] == "review") {
-            print '<li class="activePage">Review an Activity</li>';
-        } else {
-            print '<li><a href="review.php">Review an Activity</a></li>';
-        }
-        
         if ($path_parts['filename'] == "about") {
             print '<li class="activePage">About the List</li>';
         } else {
