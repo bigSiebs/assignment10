@@ -76,7 +76,7 @@ require_once('lib/validation-functions.php');
         $yourURL = $domain . $phpSelf;
         
         $username = htmlentities($_SERVER["REMOTE_USER"], ENT_QUOTES, "UTF-8");
-
+        
         // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
         // sanatize global variables 
         // function sanitize($string, $spacesAllowed)

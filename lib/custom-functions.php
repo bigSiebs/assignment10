@@ -22,3 +22,14 @@ function sanitize($string, $spacesAllowed = true, $semiColonAllowed = true) {
 
     return $string;
 }
+
+
+// this is a confirm function that asks the user if they are
+// sure they want to get rid of the last entry
+function confirm($arr){
+    foreach ($arr as $key => $value) {
+    echo "Key: $key; Value: $value<br />\n";
+}
+    
+    
+}

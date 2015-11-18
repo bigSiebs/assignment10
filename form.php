@@ -53,16 +53,15 @@ if (isset($_GET['activity']) AND adminCheck($username)) { // ADMINS ONLY
     $query .= " INNER JOIN tblTowns ON pmkTownId = fnkTownId";
     $query .= " WHERE pmkActivityId = ?";
     $data = array($activityID);
-    
+
     // Fetch data from database
     $info = $thisDatabaseReader->select($query, $data, 1, 0, 0, 0, false, false);
 
     // If array is not empty (ie, activity ID was valid)
     if ($info) {
         $edit = true; // use UPDATE query instead of INSERT
-        
         // All info will be in first array of array
-        
+
         $user = $info[0]['fnkSubmitNetId'];
 
         $activityName = $info[0]['fldName'];
@@ -72,7 +71,6 @@ if (isset($_GET['activity']) AND adminCheck($username)) { // ADMINS ONLY
 
         $town = $info[0]['fldTownName'];
         $state = $info[0]['fldState'];
-        
     }
 }
 
@@ -122,7 +120,7 @@ if (isset($_POST['btnSubmit'])) {
     if ($activityID > 0) {
         $update = true;
     }
-    
+
     $activityData[] = $user;
 
     $activityName = htmlentities($_POST['txtActivityName'], ENT_QUOTES, "UTF-8");
@@ -197,7 +195,7 @@ if (isset($_POST['btnSubmit'])) {
         } else {
             $query = "INSERT INTO tblActivities SET";
         }
-        
+
         $query .= " fnkSubmitNetId = ?,";
         $query .= " fldName = ?,";
         $query .= " fldCategory = ?,";
@@ -207,18 +205,16 @@ if (isset($_POST['btnSubmit'])) {
         //    $activityData [] = $cost;
         //}
         $query .= " fnkTownId = 1"; //hard-coded to Burlington for now
-        
+
         if ($update) { // IMPORTANT: do not forget to add this to UPDATE queries
             $query .= " WHERE pmkActivityId = ?";
             $activityData[] = $activityID;
-            
+
             $activity = $thisDatabaseWriter->update($query, $activityData, 1, 0, 0, 0, false, false);
-        
-            
         } else {
             $activity = $thisDatabaseWriter->insert($query, $activityData, 0, 0, 0, 0, false, false);
         }
-        
+
         //$recordID = $thisDatabaseWriter->lastInsert();
         // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
         //
@@ -266,53 +262,65 @@ if (isset($_POST['btnSubmit'])) {
 <article>
     <h2>Form</h2>
 
-    <?php
+<?php
 // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
 //
-    // SECTION 3a
+// SECTION 3a
 // If its the first time coming to form or there are errors, display form.
-    if (isset($_POST["btnSubmit"]) AND empty($errorMsg)) { // closing marked with 'end body submit'
-        print "<h2>Your request has ";
+if (isset($_POST["btnSubmit"]) AND empty($errorMsg)) { // closing marked with 'end body submit'
+    print "<h2>Your request has ";
 
-        if (!$mailed) {
-            print 'not ';
-        }
+    if (!$mailed) {
+        print 'not ';
+    }
 
-        print "been processed.</h2>";
+    print "been processed.</h2>";
 
-        if ($mailed) {
-            print "<p>A copy of this message has been sent to: " . $email . ".</p>";
-            print "<p>Mail message:</p>";
-            print $message;
-        }
-    } else {
+    if ($mailed) {
+        print "<p>A copy of this message has been sent to: " . $email . ".</p>";
+        print "<p>Mail message:</p>";
+        print $message;
+    }
+}
+// %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%  CONFIRMATION %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
+//  if the remove button is pressed 
+elseif (isset($_POST["btnRemove"])) {
+    print "<p>The Remove button was pressed!</p>";
+    print "<p><pre>";
+    print_r($activityData);
+    confirm($activityData);
+    print "</p>";
+}
+
+ else{
 
 
-        // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
-        //
+    // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
+    //
         // SECTION 3b: Error messages: Display any error message before we print form
 
-        if ($errorMsg) {
-            print '<div class="errors">';
-            print "<ol>\n";
-            foreach ($errorMsg as $err) {
-                print "\t<li>" . $err . "</li>\n";
-            }
-            print "</ol>\n";
-            print "</div>";
+    if ($errorMsg) {
+        print '<div class="errors">';
+        print "<ol>\n";
+        foreach ($errorMsg as $err) {
+            print "\t<li>" . $err . "</li>\n";
         }
+        print "</ol>\n";
+        print "</div>";
+    }
 
-        // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
-        //
+    // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
+    //
         // SECTION 3c: HTML form: Display HTML form
-        // Action is to this same page. $phpSelf is defined in top.php
-        /* Note lines like: value="<?php print $email; ?> 
-         * These make the form sticky by displaying the default value or
-         * the value that was typed in previously.
-         * Also note lines like <?php if ($emailERROR) print 'class="mistake"'; ?> 
-         * These allow us to use CSS to identify errors with style. */
-        ?>
-
+    // Action is to this same page. $phpSelf is defined in top.php
+    /* Note lines like: value="<?php print $email; ?> 
+     * These make the form sticky by displaying the default value or
+     * the value that was typed in previously.
+     * Also note lines like <?php if ($emailERROR) print 'class="mistake"'; ?> 
+     * These allow us to use CSS to identify errors with style. */
+    print $username;
+    ?>
+ 
         <form action="<?php print $phpSelf; ?>"
               method="post"
               id="frmAddActivity">
@@ -323,16 +331,16 @@ if (isset($_POST['btnSubmit'])) {
 
                 <fieldset class="basic-info">
                     <legend>Basic Information</legend>
-                    
+
                     <input type="hidden" id="hidActivityId" name="hidActivityId"
-                       value="<?php print $activityID; ?>"
-                       >
-                    
+                           value="<?php print $activityID; ?>"
+                           >
+
                     <label for="txtUsername" class="required">NetID
                         <input type="text" id="txtUsername" name="txtUsername"
                                value="<?php print $user; ?>"
                                tabindex="100" maxlength="45" readonly class="no-edit
-                               <?php if ($userError) print ' mistake'; ?>"
+    <?php if ($userError) print ' mistake'; ?>"
                                onfocus="this.select()"
                                autofocus>
                     </label>
@@ -341,7 +349,7 @@ if (isset($_POST['btnSubmit'])) {
                         <input type="text" id="txtActivityName" name="txtActivityName"
                                value="<?php print $activityName; ?>"
                                tabindex="110" maxlength="255" 
-                               <?php if ($activityNameError) print 'class="mistake"'; ?>
+    <?php if ($activityNameError) print 'class="mistake"'; ?>
                                onfocus="this.select()"
                                autofocus>
                     </label>
@@ -349,21 +357,21 @@ if (isset($_POST['btnSubmit'])) {
                     <fieldset class="listbox1">
                         <label for="lstCategory">Category</label>
                         <select id="lstCategory" name="lstCategory"
-                        <?php if ($categoryError) print 'class="mistake"'; ?>
+    <?php if ($categoryError) print 'class="mistake"'; ?>
                                 tabIndex="200">
-                                    <?php
-                                    // Array for listbox options
-                                    $categoryChoices = array("Select one", "Outdoor", "School-Related", "Social");
+    <?php
+    // Array for listbox options
+    $categoryChoices = array("Select one", "Outdoor", "School-Related", "Social");
 
-                                    foreach ($categoryChoices as $choice) {
-                                        print "\n\t\t\t" . "<option ";
-                                        if ($category == $choice) {
-                                            print 'selected ';
-                                        }
-                                        print 'value="' . $choice . '">' . $choice . "</option>";
-                                        print "\n";
-                                    }
-                                    ?>
+    foreach ($categoryChoices as $choice) {
+        print "\n\t\t\t" . "<option ";
+        if ($category == $choice) {
+            print 'selected ';
+        }
+        print 'value="' . $choice . '">' . $choice . "</option>";
+        print "\n";
+    }
+    ?>
                         </select>
                     </fieldset> <!-- end listbox1 -->
 
@@ -373,7 +381,7 @@ if (isset($_POST['btnSubmit'])) {
                                       id="chkOnCampus" 
                                       name="chkOnCampus" 
                                       value="On Campus"
-                                      <?php if ($onCampus) print " checked "; ?>
+    <?php if ($onCampus) print " checked "; ?>
                                       tabindex="300">Is this activity on campus?</label>
                     </fieldset> <!-- end checkbox -->
 
@@ -381,26 +389,26 @@ if (isset($_POST['btnSubmit'])) {
                         <input type="text" id="txtTown" name="txtTown"
                                value="<?php print $town; ?>"
                                tabindex="400" maxlength="255" 
-                               <?php if ($townError) print 'class="mistake"'; ?>
+    <?php if ($townError) print 'class="mistake"'; ?>
                                onfocus="this.select()"
                                autofocus>
                     </label>
 
                     <label for="lstState">State</label>
                     <select id="lstState" name="lstState" tabIndex="410">
-                        <?php
-                        // Array for listbox options
-                        $stateChoices = array("MA", "NH", "NY", "QC", "VT");
+                               <?php
+                               // Array for listbox options
+                               $stateChoices = array("MA", "NH", "NY", "QC", "VT");
 
-                        foreach ($stateChoices as $choice) {
-                            print "\n\t\t\t" . "<option ";
-                            if ($state == $choice) {
-                                print 'selected ';
-                            }
-                            print 'value="' . $choice . '">' . $choice . "</option>";
-                            print "\n";
-                        }
-                        ?>
+                               foreach ($stateChoices as $choice) {
+                                   print "\n\t\t\t" . "<option ";
+                                   if ($state == $choice) {
+                                       print 'selected ';
+                                   }
+                                   print 'value="' . $choice . '">' . $choice . "</option>";
+                                   print "\n";
+                               }
+                               ?>
                     </select>
 
                 </fieldset> <!-- end basic-info -->
@@ -408,17 +416,25 @@ if (isset($_POST['btnSubmit'])) {
                 <fieldset class="buttons">
                     <legend></legend>
                     <input type="submit" id="btnSubmit" name="btnSubmit" value="Submit" tabindex="900" class="button">
+  <!--php check user name & delete button-->
+                    <input type="submit" id="btnRemove" name="btnRemove" value="Remove" tabindex="900" class="button">
+  <!-- New form, for the remove button!-->
+<!--          <form action="<?php $page="/confirm.php"; echo htmlspecialchars($_SERVER['PHP_SELF']) .$page; ?>"
+              method="post"
+              id="frmRemoveActivity">
+              <input type="submit" id="btnRemove" name="btnRemove" value="Remove" tabindex="900" class="button">
+          </form> -->
                 </fieldset> <!-- ends buttons -->
 
             </fieldset> <!-- end wrapper! -->
         </form> <!-- end form! -->
 
-        <?php
-    } // end body submit
-    ?>
+    <?php
+} // end body submit
+?>
 
 </article>
 
-<?php
-include 'footer.php';
-?>
+    <?php
+    include 'footer.php';
+    ?>

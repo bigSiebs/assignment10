@@ -22,6 +22,9 @@ function securityCheck($path_parts, $yourURL, $form = false) {
     $whiteListPages[] = "top-10.php";
     $whiteListPages[] = "form.php";
     $whiteListPages[] = "admin.php";
+    $whiteListPages[] = "about.php";
+    $whiteListPages[] = "confirm.php";
+    
 
     //add all the folders to this array
     $whiteListFolders = array();
@@ -93,6 +96,8 @@ function securityCheck($path_parts, $yourURL, $form = false) {
     return $passed;
 }
 
+
+/// MAKE A TABLE FOR ADMINS, query them for uses
 function adminCheck($user) {
     $passed = true;
     
