@@ -36,19 +36,24 @@ $user = $username;
 
 $activityName = "";
 $category = "Select one";
-
 $onCampus = false; // not checked
 
-$town = "";
+$town = "Burlington";
 $state = "VT";
 $distance = 0;
+
+$location = "";
+$cost = "";
+$url = "";
+$comments = "";
 
 if (isset($_GET['activity']) AND adminCheck($username)) { // ADMINS ONLY
     $activityID = (int) $_GET['activity'];
 
     // Build query to get info from database
     $query = "SELECT fldName, fldCategory, fldOnCampus, fnkSubmitNetId,";
-    $query .= " fldTownName, fldState, fldDistance";
+    $query .= " fldTownName, fldState, fldDistance,";
+    $query .= " fldLocation, fldCost, fldURL, fldDescription";
     $query .= " FROM tblActivities";
     $query .= " INNER JOIN tblTowns ON pmkTownId = fnkTownId";
     $query .= " WHERE pmkActivityId = ?";
@@ -67,13 +72,17 @@ if (isset($_GET['activity']) AND adminCheck($username)) { // ADMINS ONLY
 
         $activityName = $info[0]['fldName'];
         $category = $info[0]['fldCategory'];
-
         $onCampus = $info[0]['fldOnCampus']; // int cast to boolean
 
         $town = $info[0]['fldTownName'];
         $state = $info[0]['fldState'];
         $distance = $info[0]['fldDistance'];
         
+        $location = $info[0]['fldLocation'];
+        
+        $cost = $info[0]['fldCost'];
+        $url = $info[0]['fldURL'];
+        $comments = $info[0]['fldDescription'];
     }
 }
 
@@ -87,6 +96,10 @@ $activityNameError = false;
 $categoryError = false;
 $townError = false;
 $distanceError = false;
+$locationError = false;
+$costError = false;
+$urlError = false;
+$commentsError = false;
 
 // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
 //
@@ -150,8 +163,20 @@ if (isset($_POST['btnSubmit'])) {
     $state = $_POST['lstState'];
     $townData[] = $state;
     
-    $distance = $_POST['txtDistance'];
+    $distance = htmlentities($_POST['txtDistance'], ENT_QUOTES, "UTF-8");
     $townData[] = $distance;
+    
+    $location = htmlentities($_POST['txtLocation'], ENT_QUOTES, "UTF-8");
+    $activityData[] = $location;
+    
+    $cost = htmlentities($_POST['txtCost'], ENT_QUOTES, "UTF-8");
+    $activityData[] = $cost;
+    
+    $url = htmlentities($_POST['txtURL'], ENT_QUOTES, "UTF-8");
+    $activityData[] = $url;
+    
+    $comments = htmlentities($_POST['txtComments'], ENT_QUOTES, "UTF-8");
+    $activityData[] = $comments;
 
     // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
     //
@@ -161,7 +186,7 @@ if (isset($_POST['btnSubmit'])) {
         $errorMsg[] = "Please enter your NetID.";
         $userError = true;
     } elseif (!verifyAlphaNum($user)) {
-        $errorMsg[] = "Your NetID appears to include invalid charaters.";
+        $errorMsg[] = "Your NetID appears to include invalid characters.";
         $userError = true;
     }
 
@@ -182,7 +207,7 @@ if (isset($_POST['btnSubmit'])) {
         $errorMsg[] = "Please enter the town name.";
         $townError = true;
     } elseif (!verifyAlphaNum($town)) {
-        $errorMsg[] = "The town name appears to include invalid charaters.";
+        $errorMsg[] = "The town name appears to include invalid characters.";
         $townError = true;
     }
     
@@ -192,6 +217,30 @@ if (isset($_POST['btnSubmit'])) {
     } elseif (!verifyNumeric($distance)) {
         $errorMsg[] = "The value entered for the distance must be strictly numeric.";
         $distanceError = true;
+    }
+    
+    // Location field can be blank
+    if (!verifyAlphaNum($location)) {
+        $errorMsg[] = "The location info appears to contain invalid characters.";
+        $locationError = true;
+    }
+    
+    // cost field can be blank
+    if (!verifyNumeric($cost)) {
+        $errorMsg[] = "The cost must be a number.";
+        $costError = true;
+    }
+    
+    // URL field can be blank
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        $errorMsg[] = "The URL you've provided is invalid.";
+        $urlError = true;
+    }
+    
+    // Description field can be blank
+    if (!verifyAlphaNum($comments)) {
+        $errorMsg[] = "Your comments contain invalid characters.";
+        $commentsError = true;
     }
 
     // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
@@ -246,12 +295,25 @@ if (isset($_POST['btnSubmit'])) {
         $query .= " fnkSubmitNetId = ?,";
         $query .= " fldName = ?,";
         $query .= " fldCategory = ?,";
-        $query .= " fldOnCampus = ?,";
-        $query .= " fnkTownId = ?";
-        //if ($cost != "") {
-        //    $query .= "fldCost = ?";
-        //    $activityData [] = $cost;
-        //}
+        $query .= " fldOnCampus = ?";
+        
+        if ($location != "") {
+            $query .= ", fldLocation = ?";
+        }
+        
+        if ($cost != "") {
+            $query .= ", fldCost = ?";
+        }
+        
+        if ($url != "") {
+            $query .= ", fldURL =?";
+        }
+        
+        if ($comments != "") {
+            $query .= ", fldDescription = ?";
+        }
+        
+        $query .= ", fnkTownId = ?";
         
         if ($update) { // IMPORTANT: do not forget to add this to UPDATE queries
             $query .= " WHERE pmkActivityId = ?";
@@ -487,6 +549,46 @@ if (isset($_POST['btnSubmit'])) {
                     </label>
 
                 </fieldset> <!-- end location-info -->
+                
+                <fieldset class="optional-info">
+                    <legend>Optional Information</legend>
+                    
+                    <label for="txtLocation" class="required">Location Description
+                        <input type="text" id="txtLocation" name="txtLocation"
+                               value="<?php print $location; ?>"
+                               tabindex="500" maxlength="255" 
+                               <?php if ($locationError) print 'class="mistake"'; ?>
+                               onfocus="this.select()"
+                               autofocus>
+                    </label>
+                    
+                    <label for="txtCost" class="required">Cost to Participate
+                        <input type="text" id="txtCost" name="txtCost"
+                               value="<?php print $cost; ?>"
+                               tabindex="510" maxlength="255" 
+                               <?php if ($costError) print 'class="mistake"'; ?>
+                               onfocus="this.select()"
+                               autofocus>
+                    </label>
+                    
+                    <label for="txtURL" class="required">URL
+                        <input type="text" id="txtURL" name="txtURL"
+                               value="<?php print $url; ?>"
+                               tabindex="520" maxlength="255" 
+                               <?php if ($urlError) print 'class="mistake"'; ?>
+                               onfocus="this.select()"
+                               autofocus>
+                    </label>
+                    
+                    <label for="txtComments" class="required">Description</label>
+                    <textarea id="txtComments"
+                                  name="txtComments"
+                                  tabindex="600"
+                                  <?php if ($commentsError) print 'class="mistake"'; ?>
+                                  onfocus="this.select()"><?php print $comments; ?>
+                    </textarea>
+                    
+                </fieldset> <!-- end optional-info -->
 
                 <fieldset class="buttons">
                     <legend></legend>

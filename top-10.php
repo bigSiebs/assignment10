@@ -30,6 +30,21 @@ if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
     if (!$checkActivity) {
         print "<p>Invalid activity number.</p>";
     } else { // if valid
+        $selectUserQuery = "SELECT pmkNetId";
+        $selectUserQuery .= " FROM tblAffiliates";
+        $selectUserQuery .= " WHERE pmkNetId = ?";
+        $selectUserData = array($username);
+
+        $checkUser = $thisDatabaseReader->select($selectUserQuery, $selectUserData, 1, 0, 0, 0, false, false);
+
+        if (!$checkUser) { // if user is not in affiliates table
+            $userInsertQuery = "INSERT INTO tblAffiliates SET";
+            $userInsertQuery .= " pmkNetId = ?";
+            $userInsertData = array($username);
+
+            $userInserted = $thisDatabaseWriter->insert($userInsertQuery, $userInsertData, 0, 0, 0, 0, false, false);
+        }
+
         // Query database for user/activity vote combo
         $checkVoteQuery = "SELECT fldVote";
         $checkVoteQuery .= " FROM tblVotes";
