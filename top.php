@@ -1,4 +1,6 @@
 <?php
+$debug = false;
+
 include "lib/constants.php";
 require_once('lib/custom-functions.php');
 require_once('lib/validation-functions.php');
@@ -17,44 +19,17 @@ require_once('lib/validation-functions.php');
         <script src="//html5shim.googlecode.com/sin/trunk/html5.js"></script>
         <![endif]-->
 
-        <link rel="stylesheet" href="css/styles.css" type="text/css" media="screen">
-
         <?php
-        $debug = false;
-
-        // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
-        //
-        // inlcude all libraries. Note some are in lib and some are in bin
-        // bin should be located at the same level as www-root (it is not in 
-        // github)
-        // 
-        // yourusername
-        //     bin
-        //     www-logs
-        //     www-root
-        
-        
-        $includeDBPath = "../bin/";
-        $includeLibPath = "../lib/";
-        
-        
-        require_once($includeLibPath . 'mailMessage.php');
-
-        require_once('lib/security.php');
-        
-        require_once($includeDBPath . 'Database.php');
-        
         // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
         //
         // PATH SETUP
         //  
-            
         // sanitize the server global variable
         $_SERVER = filter_input_array(INPUT_SERVER, FILTER_SANITIZE_STRING);
         foreach ($_SERVER as $key => $value) {
             $_SERVER[$key] = sanitize($value, false);
         }
-        
+
         $domain = "//"; // let the server set http or https as needed
 
         $server = htmlentities($_SERVER['SERVER_NAME'], ENT_QUOTES, "UTF-8");
@@ -72,10 +47,42 @@ require_once('lib/validation-functions.php');
             print_r($path_parts);
             print "</pre>";
         }
-        
+
         $yourURL = $domain . $phpSelf;
-        
-        $username = htmlentities($_SERVER["REMOTE_USER"], ENT_QUOTES, "UTF-8");
+
+        if (in_array("admin", explode("/", $path_parts['dirname']))) {
+            $path = "../";
+            $adminPath = "";
+            $includeDBPath = "../";
+            $includeLibPath = "../";
+        } else {
+            $path = "";
+            $adminPath = "admin/";
+            $includeDBPath = "";
+            $includeLibPath = "";
+        }
+
+        // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
+        //
+        // inlcude all libraries. Note some are in lib and some are in bin
+        // bin should be located at the same level as www-root (it is not in 
+        // github)
+        // 
+        // yourusername
+        //     bin
+        //     www-logs
+        //     www-root
+
+
+        $includeDBPath .= "../bin/";
+        $includeLibPath .= "../lib/";
+
+
+        require_once($includeLibPath . 'mailMessage.php');
+
+        require_once('lib/security.php');
+
+        require_once($includeDBPath . 'Database.php');
 
         // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
         // sanatize global variables 
@@ -95,7 +102,9 @@ require_once('lib/validation-functions.php');
                 $_GET[$key] = sanitize($value, false);
             }
         }
-        
+
+        $username = htmlentities($_SERVER["REMOTE_USER"], ENT_QUOTES, "UTF-8");
+
         // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
         //
         // Process security check.
@@ -116,15 +125,21 @@ require_once('lib/validation-functions.php');
         $dbName = DATABASE_NAME;
 
         $thisDatabaseReader = new Database($dbUserName, $whichPass, $dbName);
-        
+
         $dbUserName = get_current_user() . '_writer';
         $whichPass = "w";
         $thisDatabaseWriter = new Database($dbUserName, $whichPass, $dbName);
-        
+
         $dbUserName = get_current_user() . '_admin';
         $whichPass = "a";
         $thisDatabaseAdmin = new Database($dbUserName, $whichPass, $dbName);
-        ?>	
+        ?>
+
+        <link rel="stylesheet" href="<?php print $path; ?>css/styles.css"
+              type="text/css" media="screen">
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="<?php print $path; ?>js/show-info.js"></script>
 
     </head>
 

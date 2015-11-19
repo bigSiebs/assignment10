@@ -97,3 +97,15 @@ footer {
 input.no-edit {
     background-color: lightgray
 }
+
+div#overlay {
+   display: none;
+   position: fixed;
+   left: 0px;        /* This positions the element to the left most position */
+   top: 0px;         /* This positions the elment to the top most position */
+   width: 100%;      /* This makes the element take up 100% of the parents width */
+   height: 100%;     /* This makes the element take up 100% of the parents height */
+   background: #000; /* black */
+   opacity: 0.5;
+   z-index: 99999;   /* Change the z-index so it will be above everything else */
+}

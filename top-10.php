@@ -97,8 +97,11 @@ if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
     }
 }
 
+print "</section>";
+
 // NEED TO ADD LIMIT CLAUSE
-$query = "SELECT pmkActivityId, fldName, fldOnCampus, fldTownName, fldState";
+$query = "SELECT pmkActivityId, fldName, fldCategory, fldOnCampus, fldTownName, fldState";
+$query .= ", fldDistance, fldLocation, fldCost, fldURL, fldDescription, fnkSubmitNetId";
 $query .= " FROM tblActivities A";
 $query .= " INNER JOIN tblVotes V ON A.pmkActivityId = V.fnkActivityId";
 $query .= " INNER JOIN tblTowns T ON A.fnkTownId = T.pmkTownId";
@@ -118,91 +121,81 @@ if ($debug) {
     print "</pre></p>";
 }
 
-// Start printing table
-print '<table>';
-print '<tr>';
-
-// If user is admin, print blank heading to offset for [Edit] column
-if (adminCheck($username)) {
-        print '<th></th>';
-    }
-
-// Get headings from first subarray (removes indexes with filter function)
-$fields = array_keys($info[0]);
-$headers = array_filter($fields, 'is_string'); // Picks up only str values
-// Print headings
-foreach ($headers as $head) {
-    $camelCase = preg_split('/(?=[A-Z])/', substr($head, 3));
-
-    $heading = "";
-
-    foreach ($camelCase as $oneWord) {
-        $heading .= $oneWord . " ";
-    }
-
-    print '<th>' . $heading . '</th>';
-}
-
-// Print vote headings for all columns
-print "<th>Vote Up</th>";
-print "<th>Vote Down</th>";
-
-print "</tr>";
+$rank = 1;
 
 // For loop to print records
 foreach ($info as $record) {
-    print '<tr>';
+    print '<div id="dropdown-' . $rank . '" ';
+    print 'class="dropdown dropdown-processed">';
     
-    // Make admin-only [Edit] column, which allows admin to edit records
-    if (adminCheck($username)) {
-        print '<td><a href="form.php?activity=' . $record['pmkActivityId'] . '">';
-        print '[Edit]</a></td>';
-    }
-    
-    // Uses field names (AKA headers) as keys to pick from arrays
-    foreach ($headers as $field) {
-        print '<td>' . htmlentities($record[$field]) . '</td>';
-    }
-    
+    // ** Add vote buttons **//
     // Add upvote form/button
-    print '<td>';
     print '<form action="' . $phpSelf . '" method="post" ';
-    print 'id="frmUpVote' . $record['pmkActivityId'] . '">';
+    print 'id="frmVote-' . $record['pmkActivityId'] . '">';
     
     // Add hidden field to hold activity ID
     print '<fieldset class="vote-button">';
     print '<input type="hidden" id="hidActivityId' . $record['pmkActivityId'] . '" ';
     print 'name="hidActivityId" value="' . $record['pmkActivityId'] . '">';
     
-    // Add button
-    print '<input type="submit" id="btnUpVote' . $record['pmkActivityId'] . '" ';
+    // Add up button
+    print '<input type="submit" id="btnUpVote-' . $record['pmkActivityId'] . '" ';
     print 'name="btnUpVote" value="&#x25B2" ';
     print 'tabindex="100" class="up-vote">';
-    print '</fieldset>';
-    print '</form></td>';
-
-    // Add downvote form/button
-    print '<td>';
-    print '<form action="' . $phpSelf . '" method="post" ';
-    print 'id="frmDownVote' . $record['pmkActivityId'] . '">';
     
-    // Add hidden field to hold activity ID
-    print '<fieldset class="vote-button">';
-    print '<input type="hidden" id="hidActivityId' . $record['pmkActivityId'] . '" ';
-    print 'name="hidActivityId" value="' . $record['pmkActivityId'] . '">';
-    
-    // Add button
-    print '<input type="submit" id="btnDownVote' . $record['pmkActivityId'] . '" ';
+    // Add down button
+    print '<input type="submit" id="btnDownVote-' . $record['pmkActivityId'] . '" ';
     print 'name="btnDownVote" value="&#x25BC" ';
     print 'tabindex="110" class="down-vote">';
     print '</fieldset>';
     print '</form></td>';
+    
+        // Make admin-only [Edit] column, which allows admin to edit records
+    if (adminCheck($thisDatabaseReader, $username)) {
+        print '<a href="form.php?activity=' . $record['pmkActivityId'] . '">';
+        print '[Edit]</a> ';
+    }
+    
+    print $rank . '. ';
+    print '<a class="dropdown-link" href="#">';
+    print $record['fldName'];
+    print '</a>';
+    
+    print '<div class="dropdown-container" style="display: none;">';
+    print '<ol>';
+    print '<li><b>Submitted by:</b> ' . $record['fnkSubmitNetId'] . '</li>';
+    print '<li><b>Category:</b> ' . $record['fldCategory'] . '</li>';
+    print '<li><b>On Campus?</b> ';
+    if ($record['fldOnCampus'] == 1) {
+        print "YES";
+    } else {
+        print "NO";
+    }
+    print "</li>";
+    print '<li><b>Town:</b> ' . $record['fldTownName'] . ', ' . $record['fldState'] . '</li>';
+    if ($record['fldDistance'] != 0) {
+        print '<li><b>Distance from Burlington:</b> ~' . $record['fldDistance'] . ' miles</li>';
+    }
+    print '<li><b>Cost:</b> $' . $record['fldCost'] . '</li>';
+    if ($record['fldURL'] != '') {
+        print '<li><b>URL:</b> <a href="' . $record['fldURL'] . '">Click here</a></li>';
+    }
+    print '<li><b>Description:</b> ' . $record['fldDescription'] . '</li>';
+    print '</ol></div></div>';
 
-    print '</tr>';
+    $rank++;
 }
 
-// Close table
-print '</table>';
+if (adminCheck($thisDatabaseReader, $username)) {
+    print "<section>";
+
+    print "<h2>For administrators</h2>";
+    print '<p>Click <a href="' . $adminPath . 'approve.php">here</a>';
+    print ' to see a list of submitted';
+    print ' activities that are awaiting approval.</p>';
+
+    print "</section>";
+}
 
 print "</article>";
 

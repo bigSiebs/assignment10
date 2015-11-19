@@ -47,7 +47,7 @@ $cost = "";
 $url = "";
 $comments = "";
 
-if (isset($_GET['activity']) AND adminCheck($username)) { // ADMINS ONLY
+if (isset($_GET['activity']) AND adminCheck($thisDatabaseReader, $username)) { // ADMINS ONLY
     $activityID = (int) $_GET['activity'];
 
     // Build query to get info from database
@@ -167,16 +167,24 @@ if (isset($_POST['btnSubmit'])) {
     $townData[] = $distance;
     
     $location = htmlentities($_POST['txtLocation'], ENT_QUOTES, "UTF-8");
-    $activityData[] = $location;
+    if ($location != "") {
+        $activityData[] = $location;
+    }
     
     $cost = htmlentities($_POST['txtCost'], ENT_QUOTES, "UTF-8");
-    $activityData[] = $cost;
+    if ($cost != "") {
+        $activityData[] = $cost;
+    }
     
     $url = htmlentities($_POST['txtURL'], ENT_QUOTES, "UTF-8");
-    $activityData[] = $url;
-    
+    if ($url != "") {
+        $activityData[] = $url;      
+    }
+
     $comments = htmlentities($_POST['txtComments'], ENT_QUOTES, "UTF-8");
-    $activityData[] = $comments;
+    if ($comments != "" ) {
+        $activityData[] = $comments;        
+    }
 
     // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
     //
@@ -220,25 +228,25 @@ if (isset($_POST['btnSubmit'])) {
     }
     
     // Location field can be blank
-    if (!verifyAlphaNum($location)) {
+    if ($location != "" AND !verifyAlphaNum($location)) {
         $errorMsg[] = "The location info appears to contain invalid characters.";
         $locationError = true;
     }
     
     // cost field can be blank
-    if (!verifyNumeric($cost)) {
+    if ($cost != "" AND !verifyNumeric($cost)) {
         $errorMsg[] = "The cost must be a number.";
         $costError = true;
     }
     
     // URL field can be blank
-    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+    if ($url  != "" AND !filter_var($url, FILTER_VALIDATE_URL)) {
         $errorMsg[] = "The URL you've provided is invalid.";
         $urlError = true;
     }
     
     // Description field can be blank
-    if (!verifyAlphaNum($comments)) {
+    if ($comments != "" AND !verifyAlphaNum($comments)) {
         $errorMsg[] = "Your comments contain invalid characters.";
         $commentsError = true;
     }
@@ -468,7 +476,8 @@ if (isset($_POST['btnSubmit'])) {
                         <input type="text" id="txtUsername" name="txtUsername"
                                value="<?php print $user; ?>"
                                tabindex="100" maxlength="45"
-                               <?php if (!adminCheck($username)) print 'readonly'; ?>
+                               <?php if (!adminCheck($thisDatabaseReader, $username))
+                                       print 'readonly'; ?>
                                class="no-edit 
                                <?php if ($userError) print ' mistake'; ?>"
                                onfocus="this.select()"

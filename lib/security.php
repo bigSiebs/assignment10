@@ -21,7 +21,7 @@ function securityCheck($path_parts, $yourURL, $form = false) {
     $whiteListPages[] = "index.php";
     $whiteListPages[] = "top-10.php";
     $whiteListPages[] = "form.php";
-    $whiteListPages[] = "admin.php";
+    $whiteListPages[] = "approve.php";
 
     //add all the folders to this array
     $whiteListFolders = array();
@@ -30,6 +30,9 @@ function securityCheck($path_parts, $yourURL, $form = false) {
     
     $whiteListFolders[] = "/cs148/assignment10";
     $whiteListFolders[] = "/cs148develop/assignment10";
+    
+    $whiteListFolders[] = "/cs148/assignment10/admin";
+    $whiteListFolders[] = "/cs148develop/assignment10/admin";
 
     // Check for valid page name
     if (!in_array($path_parts['basename'], $whiteListPages)) {
@@ -93,11 +96,19 @@ function securityCheck($path_parts, $yourURL, $form = false) {
     return $passed;
 }
 
-function adminCheck($user) {
-    $passed = true;
+function adminCheck($dbReader, $user) {
+    $passed = false; // assume false
     
-    if ($user != 'jsiebert' AND $user != 'aychu') {
-        $passed = false;
+    $query = "SELECT pmkNetId";
+    $query .= " FROM tblAdministrators";
+    
+    $admins = $dbReader->select($query, "", 0, 0, 0, 0, false, false);
+    
+    foreach ($admins as $admin) {
+        if ($admin['pmkNetId'] == $user) {
+            $passed = true;
+            break;
+        }
     }
     
     return $passed;
