@@ -262,65 +262,68 @@ if (isset($_POST['btnSubmit'])) {
 <article>
     <h2>Form</h2>
 
-<?php
+    <?php
 // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
 //
 // SECTION 3a
 // If its the first time coming to form or there are errors, display form.
-if (isset($_POST["btnSubmit"]) AND empty($errorMsg)) { // closing marked with 'end body submit'
-    print "<h2>Your request has ";
+    if (isset($_POST["btnSubmit"]) AND empty($errorMsg)) { // closing marked with 'end body submit'
+        print "<h2>Your request has ";
 
-    if (!$mailed) {
-        print 'not ';
+        if (!$mailed) {
+            print 'not ';
+        }
+
+        print "been processed.</h2>";
+
+        if ($mailed) {
+            print "<p>A copy of this message has been sent to: " . $email . ".</p>";
+            print "<p>Mail message:</p>";
+            print $message;
+        }
     }
-
-    print "been processed.</h2>";
-
-    if ($mailed) {
-        print "<p>A copy of this message has been sent to: " . $email . ".</p>";
-        print "<p>Mail message:</p>";
-        print $message;
-    }
-}
 // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%  CONFIRMATION %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
 //  if the remove button is pressed 
-elseif (isset($_POST["btnRemove"])) {
-    print "<p>The Remove button was pressed!</p>";
-    print "<p><pre>";
-    print_r($activityData);
-    confirm($activityData);
-    print "</p>";
-}
+//elseif (isset($_POST["btnRemove"])) {
+//    print "<p>The Remove button was pressed!</p>";
+//    print "<p><pre>";
+//    print_r($activityData);
+//    confirm($activityData);
+//    print "</p>";
+//}
+    elseif (isset($_POST["btnRemove"])) {
+        print "<p>The Remove button was pressed!</p>";
+    } else {
 
- else{
 
-
-    // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
-    //
+        // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
+        //
         // SECTION 3b: Error messages: Display any error message before we print form
 
-    if ($errorMsg) {
-        print '<div class="errors">';
-        print "<ol>\n";
-        foreach ($errorMsg as $err) {
-            print "\t<li>" . $err . "</li>\n";
+        if ($errorMsg) {
+            print '<div class="errors">';
+            print "<ol>\n";
+            foreach ($errorMsg as $err) {
+                print "\t<li>" . $err . "</li>\n";
+            }
+            print "</ol>\n";
+            print "</div>";
         }
-        print "</ol>\n";
-        print "</div>";
-    }
 
-    // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
-    //
+        // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
+        //
         // SECTION 3c: HTML form: Display HTML form
-    // Action is to this same page. $phpSelf is defined in top.php
-    /* Note lines like: value="<?php print $email; ?> 
-     * These make the form sticky by displaying the default value or
-     * the value that was typed in previously.
-     * Also note lines like <?php if ($emailERROR) print 'class="mistake"'; ?> 
-     * These allow us to use CSS to identify errors with style. */
-    print $username;
-    ?>
- 
+        // Action is to this same page. $phpSelf is defined in top.php
+        /* Note lines like: value="<?php print $email; ?> 
+         * These make the form sticky by displaying the default value or
+         * the value that was typed in previously.
+         * Also note lines like <?php if ($emailERROR) print 'class="mistake"'; ?> 
+         * These allow us to use CSS to identify errors with style. */
+        // Debug - wanted to see if it was getting my name
+        // set up htaccess and it got it!
+//    print $username;
+        ?>
+
         <form action="<?php print $phpSelf; ?>"
               method="post"
               id="frmAddActivity">
@@ -359,19 +362,19 @@ elseif (isset($_POST["btnRemove"])) {
                         <select id="lstCategory" name="lstCategory"
     <?php if ($categoryError) print 'class="mistake"'; ?>
                                 tabIndex="200">
-    <?php
-    // Array for listbox options
-    $categoryChoices = array("Select one", "Outdoor", "School-Related", "Social");
+                        <?php
+                        // Array for listbox options
+                        $categoryChoices = array("Select one", "Outdoor", "School-Related", "Social");
 
-    foreach ($categoryChoices as $choice) {
-        print "\n\t\t\t" . "<option ";
-        if ($category == $choice) {
-            print 'selected ';
-        }
-        print 'value="' . $choice . '">' . $choice . "</option>";
-        print "\n";
-    }
-    ?>
+                        foreach ($categoryChoices as $choice) {
+                            print "\n\t\t\t" . "<option ";
+                            if ($category == $choice) {
+                                print 'selected ';
+                            }
+                            print 'value="' . $choice . '">' . $choice . "</option>";
+                            print "\n";
+                        }
+                        ?>
                         </select>
                     </fieldset> <!-- end listbox1 -->
 
@@ -396,42 +399,57 @@ elseif (isset($_POST["btnRemove"])) {
 
                     <label for="lstState">State</label>
                     <select id="lstState" name="lstState" tabIndex="410">
-                               <?php
-                               // Array for listbox options
-                               $stateChoices = array("MA", "NH", "NY", "QC", "VT");
+    <?php
+    // Array for listbox options
+    $stateChoices = array("MA", "NH", "NY", "QC", "VT");
 
-                               foreach ($stateChoices as $choice) {
-                                   print "\n\t\t\t" . "<option ";
-                                   if ($state == $choice) {
-                                       print 'selected ';
-                                   }
-                                   print 'value="' . $choice . '">' . $choice . "</option>";
-                                   print "\n";
-                               }
-                               ?>
+    foreach ($stateChoices as $choice) {
+        print "\n\t\t\t" . "<option ";
+        if ($state == $choice) {
+            print 'selected ';
+        }
+        print 'value="' . $choice . '">' . $choice . "</option>";
+        print "\n";
+    }
+    ?>
                     </select>
 
                 </fieldset> <!-- end basic-info -->
 
                 <fieldset class="buttons">
                     <legend></legend>
+
                     <input type="submit" id="btnSubmit" name="btnSubmit" value="Submit" tabindex="900" class="button">
-  <!--php check user name & delete button-->
-                    <input type="submit" id="btnRemove" name="btnRemove" value="Remove" tabindex="900" class="button">
-  <!-- New form, for the remove button!-->
-<!--          <form action="<?php $page="/confirm.php"; echo htmlspecialchars($_SERVER['PHP_SELF']) .$page; ?>"
-              method="post"
-              id="frmRemoveActivity">
-              <input type="submit" id="btnRemove" name="btnRemove" value="Remove" tabindex="900" class="button">
-          </form> -->
                 </fieldset> <!-- ends buttons -->
 
             </fieldset> <!-- end wrapper! -->
         </form> <!-- end form! -->
 
+        <!--php check user name & delete button-->
+        <!-- New form, for the remove button! -->
     <?php
-} // end body submit
-?>
+    if (isset($_GET['activity']) AND adminCheck($username)) { // ADMINS ONLY
+        print '<form action="remove.php" method="post"  id="removeForm"> ';
+        print '<input type="submit" id="btnRemove" name="btnRemove" value="Remove" tabindex="900" class="button">';
+        $activityID = (int) $_GET['activity'];
+        print '<input type="hidden" id="hidActivityId' .$activityID. '" ';
+        print 'name="hidActivityId" value="' .$activityID. '">';
+        print "</form>";
+        //print $activityID;
+    }
+//    $activityID = (int) $_GET['activity'];
+//                    <form action="remove.php" 
+//                          method="post" 
+//                          id="removeForm">
+//                    <input type="submit" id="btnRemove" name="btnRemove" value="Remove" tabindex="900" class="button">
+//                    </form>
+    ?>
+                   <!--  <input type="submit" id="btnRemove" name="btnRemove" value="Remove" tabindex="900" class="button">
+        -->
+
+        <?php
+    } // end body submit
+    ?>
 
 </article>
 

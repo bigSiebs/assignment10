@@ -43,7 +43,7 @@ $emailERROR = false;
 $errorMsg = array();
 // array used to hold form values that will be written to a CSV file
 $dataRecord = array();
-$mailed=false; // have we mailed the information to the user?
+$mailed = false; // have we mailed the information to the user?
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //
 // SECTION: 2 Process for when the form is submitted
@@ -58,7 +58,7 @@ if (isset($_POST["btnSubmit"])) {
         $msg.= "Security breach detected and reported</p>";
         die($msg);
     }
-    
+
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     //
     // SECTION: 2b Sanitize (clean) data 
@@ -146,9 +146,7 @@ if (isset($_POST["btnSubmit"])) {
         $todaysDate = strftime("%x");
         $subject = "Research Study: " . $todaysDate;
         $mailed = sendMail($to, $cc, $bcc, $from, $subject, $message);
-        
     } // end form is valid
-    
 } // ends if form was submitted.
 //#############################################################################
 //
@@ -158,61 +156,62 @@ if (isset($_POST["btnSubmit"])) {
 
 <article id="main">
 
-    <?php
+<?php
+//####################################
+//
+    // SECTION 3a.
+//
+    // 
+// 
+// 
+// If its the first time coming to the form or there are errors we are going
+// to display the form.
+if (isset($_POST["btnSubmit"]) AND empty($errorMsg)) { // closing of if marked with: end body submit
+    print "<h1>Your Request has ";
+    if (!$mailed) {
+        print "not ";
+    }
+    print "been processed</h1>";
+    print "<p>A copy of this message has ";
+    if (!$mailed) {
+        print "not ";
+    }
+    print "been sent</p>";
+    print "<p>To: " . $email . "</p>";
+    print "<p>Mail Message:</p>";
+    print $message;
+} else {
     //####################################
     //
-    // SECTION 3a.
-    //
-    // 
-    // 
-    // 
-    // If its the first time coming to the form or there are errors we are going
-    // to display the form.
-    if (isset($_POST["btnSubmit"]) AND empty($errorMsg)) { // closing of if marked with: end body submit
-        print "<h1>Your Request has ";
-        if (!$mailed) {
-            print "not ";
-        }
-        print "been processed</h1>";
-        print "<p>A copy of this message has ";
-        if (!$mailed) {
-            print "not ";
-        }
-        print "been sent</p>";
-        print "<p>To: " . $email . "</p>";
-        print "<p>Mail Message:</p>";
-        print $message;
-    } else {
-        //####################################
-        //
         // SECTION 3b Error Messages
-        //
+    //
         // display any error messages before we print out the form
-        if ($errorMsg) {
-            print '<div id="errors">';
-            print "<ol>\n";
-            foreach ($errorMsg as $err) {
-                print "<li>" . $err . "</li>\n";
-            }
-            print "</ol>\n";
-            print '</div>';
+    if ($errorMsg) {
+        print '<div id="errors">';
+        print "<ol>\n";
+        foreach ($errorMsg as $err) {
+            print "<li>" . $err . "</li>\n";
         }
-        //####################################
-        //
+        print "</ol>\n";
+        print '</div>';
+    }
+    //####################################
+    //
         // SECTION 3c html Form
-        //
+    //
         /* Display the HTML form. note that the action is to this same page. $phpSelf
-          is defined in top.php
-          NOTE the line:
-          value="<?php print $email; ?>
-          this makes the form sticky by displaying either the initial default value (line 35)
-          or the value they typed in (line 84)
-          NOTE this line:
-          <?php if($emailERROR) print 'class="mistake"'; ?>
-          this prints out a css class so that we can highlight the background etc. to
-          make it stand out that a mistake happened here.
-         */
-        ?>
+      is defined in top.php
+      NOTE the line:
+      value="<?php print $email; ?>
+      this makes the form sticky by displaying either the initial default value (line 35)
+      or the value they typed in (line 84)
+      NOTE this line:
+      <?php if($emailERROR) print 'class="mistake"'; ?>
+      this prints out a css class so that we can highlight the background etc. to
+      make it stand out that a mistake happened here.
+     */
+///////////////////////////////////////
+    ?>
 
         <form action="<?php print $phpSelf; ?>"
               method="post"
@@ -231,35 +230,39 @@ if (isset($_POST["btnSubmit"])) {
                             <input type="text" id="txtFirstName" name="txtFirstName"
                                    value="<?php print $firstName; ?>"
                                    tabindex="100" maxlength="45" placeholder="Enter your first name"
-                                   <?php if ($firstNameERROR) print 'class="mistake"'; ?>
+    <?php if ($firstNameERROR) print 'class="mistake"'; ?>
                                    onfocus="this.select()"
                                    autofocus>
                         </label>
-                        
+
                         <label for="txtEmail" class="required">Email
                             <input type="text" id="txtEmail" name="txtEmail"
                                    value="<?php print $email; ?>"
                                    tabindex="120" maxlength="45" placeholder="Enter a valid email address"
-                                   <?php if ($emailERROR) print 'class="mistake"'; ?>
+    <?php if ($emailERROR) print 'class="mistake"'; ?>
                                    onfocus="this.select()" 
                                    >
                         </label>
                     </fieldset> <!-- ends contact -->
-                    
+
                 </fieldset> <!-- ends wrapper Two -->
-                
+
                 <fieldset class="buttons">
                     <legend></legend>
                     <input type="submit" id="btnSubmit" name="btnSubmit" value="Register" tabindex="900" class="button">
                 </fieldset> <!-- ends buttons -->
-                
+
             </fieldset> <!-- Ends Wrapper -->
         </form>
 
     <?php
-    } // end body submit
-    ?>
+} // end body submit
+if (isset($_POST["hidActivityId"])) {
+    print "<p> testing </p>";
+    print "<p>" . $_POST["hidActivityId"] . "</p>";
+}
+?>
 
 </article>
 
-<?php include "footer.php"; ?>
+    <?php include "footer.php"; ?>
