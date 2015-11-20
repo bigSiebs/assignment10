@@ -18,12 +18,18 @@ include "top.php";
         // run the query to delete  the record from tblActivities
         $activityID = (int) $_POST["hidActivityId"];
         // write the query to delete everything!
-        $query = "DELETE from tblActivities";
-        $query .= " WHERE pmkActivityID = ?";       
+        // QUERY 1 - deletes form tblActivities
+        $query1 = "DELETE from tblActivities";
+        $query1 .= " WHERE pmkActivityID = ?";    
+        $query2 = "DELETE from tblVotes";
+        $query2 .= " WHERE fnkActivityID = ?";  
         $data = array($activityID);
-        $info = $thisDatabaseReader->testquery($query, $data, 1, 0, 0, 0, false, false);
-//        print "<p>".$activityId."</p>";
-        // run the query to delete  the record from tblVotes
+        //
+//        $info1 = $thisDatabaseWriter->testquery($query1, $data, 1, 0, 0, 0, false, false);
+//        $info2 = $thisDatabaseWriter->testquery($query2, $data, 1, 0, 0, 0, false, false);
+        $info1 = $thisDatabaseWriter->select($query1, $data, 1, 0, 0, 0, false, false);
+        $info2 = $thisDatabaseWriter->select($query2, $data, 1, 0, 0, 0, false, false);
+        print "<p>The Record has been deleted</p>";
     }
     if (isset($_GET["hidActivityId"])) {
         //debug coding

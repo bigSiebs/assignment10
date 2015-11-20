@@ -81,6 +81,7 @@ if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
     }
 }
 // NEED TO ADD LIMIT CLAUSE
+
 $query = "SELECT pmkActivityId, fldName, fldOnCampus, fldTownName, fldState";
 $query .= " FROM tblActivities A";
 $query .= " INNER JOIN tblVotes V ON A.pmkActivityId = V.fnkActivityId";
@@ -91,6 +92,7 @@ $query .= " ORDER BY SUM(fldVote) DESC LIMIT 10";
 $data = array();
 $val = array(1, 1, 0, 0);
 // Call select method
+$test = $thisDatabaseReader->testquery($query, $data, $val[0], $val[1], $val[2], $val[3], false, false);
 $info = $thisDatabaseReader->select($query, $data, $val[0], $val[1], $val[2], $val[3], false, false);
 // To troubleshoot returned array
 if ($debug) {
