@@ -429,7 +429,7 @@ if (isset($_POST['btnSubmit'])) {
         <!-- New form, for the remove button! -->
     <?php
     if (isset($_GET['activity']) AND adminCheck($username)) { // ADMINS ONLY
-        print '<form action="remove.php" method="post"  id="removeForm"> ';
+        print '<form action="remove.php" method="get"  id="removeForm"> ';
         print '<input type="submit" id="btnRemove" name="btnRemove" value="Remove" tabindex="900" class="button">';
         $activityID = (int) $_GET['activity'];
         print '<input type="hidden" id="hidActivityId' .$activityID. '" ';
