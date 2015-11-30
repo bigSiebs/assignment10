@@ -1,5 +1,5 @@
 <?php
-include "top.php";
+include "../top.php";
 ?>
 
 <article id="main">
@@ -108,4 +108,4 @@ include "top.php";
     ?>
 </article>
 
-<?php include "footer.php"; ?>
+<?php include "../footer.php"; ?>

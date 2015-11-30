@@ -37,6 +37,12 @@
             } else {
                 print '<li><a href="' . $adminPath . 'approve.php">Approve</a></li>';
             }
+            
+            if ($path_parts['filename'] == "remove") {
+                print '<li class="activePage">Remove</li>';
+            } else {
+                print '<li><a href="' . $adminPath . 'remove.php">Remove</a></li>';
+            }
         }
         ?>
     </ol>
