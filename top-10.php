@@ -148,18 +148,25 @@ foreach ($info as $record) {
     print 'name="btnDownVote" value="&#x25BC" ';
     print 'tabindex="110" class="down-vote">';
     print '</fieldset>';
-    print '</form></td>';
+    print '</form>';
+    
+    print '<p>';
     
         // Make admin-only [Edit] column, which allows admin to edit records
     if (adminCheck($thisDatabaseReader, $username)) {
-        print '<a href="form.php?activity=' . $record['pmkActivityId'] . '">';
-        print '[Edit]</a> ';
+        $appendURL = '?activity=' . $record['pmkActivityId'];
+        print '[<a href="form.php' . $appendURL . '">';
+        print 'Edit</a>] ';
+        print '[<a href="remove.php' . $appendURL . '">';
+        print 'Remove</a>] ';
     }
     
     print $rank . '. ';
     print '<a class="dropdown-link" href="#">';
     print $record['fldName'];
     print '</a>';
+    
+    print '</p>';
     
     print '<div class="dropdown-container" style="display: none;">';
     print '<ol>';
