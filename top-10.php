@@ -157,7 +157,7 @@ foreach ($info as $record) {
         $appendURL = '?activity=' . $record['pmkActivityId'];
         print '[<a href="form.php' . $appendURL . '">';
         print 'Edit</a>] ';
-        print '[<a href="remove.php' . $appendURL . '">';
+        print '[<a href="' . $adminPath . 'remove.php' . $appendURL . '">';
         print 'Remove</a>] ';
     }
     

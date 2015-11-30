@@ -92,19 +92,24 @@ if (!adminCheck($thisDatabaseReader, $username)) {
 
         print "<th></th>";
         print "<th></th>";
+        print "<th></th>";
         print "</tr>";
 
         // For loop to print records
         foreach ($info as $record) {
+            $appendURL = '?activity=' . $record['pmkActivityId'];
+            
             print '<tr>';
             // Uses field names (AKA headers) as keys to pick from arrays
             foreach ($headers as $field) {
                 print '<td>' . htmlentities($record[$field]) . '</td>';
             }
             
-            print '<td><a href="?activity=' . $record['pmkActivityId'] . '">Approve</a></td>';
-            print '<td><a href="' . $path . 'form.php?activity=';
-            print $record['pmkActivityId'] . '">Edit/Deny</a></td>';
+            print '<td><a href="' . $appendURL . '">Approve</a></td>';
+            print '<td><a href="' . $path . 'form.php' . $appendURL;
+            print '">View/Edit</a></td>';
+            print '<td><a href="' . $adminPath . 'remove.php' . $appendURL;
+            print '">Remove</a></td>';
             print '</tr>';
         }
 
