@@ -90,7 +90,8 @@ if (!adminCheck($thisDatabaseReader, $username)) {
             print '<th>' . $heading . '</th>';
         }
 
-        print "<th>Approve</th>";
+        print "<th></th>";
+        print "<th></th>";
         print "</tr>";
 
         // For loop to print records
@@ -100,7 +101,10 @@ if (!adminCheck($thisDatabaseReader, $username)) {
             foreach ($headers as $field) {
                 print '<td>' . htmlentities($record[$field]) . '</td>';
             }
+            
             print '<td><a href="?activity=' . $record['pmkActivityId'] . '">Approve</a></td>';
+            print '<td><a href="' . $path . 'form.php?activity=';
+            print $record['pmkActivityId'] . '">Edit/Deny</a></td>';
             print '</tr>';
         }
 

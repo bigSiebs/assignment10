@@ -176,7 +176,12 @@ foreach ($info as $record) {
     if ($record['fldDistance'] != 0) {
         print '<li><b>Distance from Burlington:</b> ~' . $record['fldDistance'] . ' miles</li>';
     }
-    print '<li><b>Cost:</b> $' . $record['fldCost'] . '</li>';
+    print '<li><b>Cost:</b> ';
+    if ($record['fldCost'] == 0 AND $record['fldCost'] != "") {
+        print "FREE";
+    } else {
+        print '$' . $record['fldCost'] . '</li>';
+    }
     if ($record['fldURL'] != '') {
         print '<li><b>URL:</b> <a href="' . $record['fldURL'] . '">Click here</a></li>';
     }
