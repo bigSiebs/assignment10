@@ -47,6 +47,8 @@ $cost = "";
 $url = "";
 $comments = "";
 
+$approved = false;
+
 if (isset($_GET['activity']) AND adminCheck($thisDatabaseReader, $username)) { // ADMINS ONLY
     $activityID = (int) $_GET['activity'];
 
@@ -54,6 +56,7 @@ if (isset($_GET['activity']) AND adminCheck($thisDatabaseReader, $username)) { /
     $query = "SELECT fldName, fldCategory, fldOnCampus, fnkSubmitNetId,";
     $query .= " fldTownName, fldState, fldDistance,";
     $query .= " fldLocation, fldCost, fldURL, fldDescription";
+    $query .= " fldApproved";
     $query .= " FROM tblActivities";
     $query .= " INNER JOIN tblTowns ON pmkTownId = fnkTownId";
     $query .= " WHERE pmkActivityId = ?";
@@ -79,10 +82,11 @@ if (isset($_GET['activity']) AND adminCheck($thisDatabaseReader, $username)) { /
         $distance = $info[0]['fldDistance'];
         
         $location = $info[0]['fldLocation'];
-        
         $cost = $info[0]['fldCost'];
         $url = $info[0]['fldURL'];
         $comments = $info[0]['fldDescription'];
+        
+        $approved = $info[0]['fldApproved'];
     }
 }
 
@@ -184,6 +188,14 @@ if (isset($_POST['btnSubmit'])) {
     $comments = htmlentities($_POST['txtComments'], ENT_QUOTES, "UTF-8");
     if ($comments != "" ) {
         $activityData[] = $comments;        
+    }
+    
+    // Saved as 0/1 for database
+    if (isset($_POST["chkApproved"])) {
+        $approved = 1;
+        $activityData[] = $approved;
+    } else {
+        $approved = 0;
     }
 
     // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
@@ -321,6 +333,10 @@ if (isset($_POST['btnSubmit'])) {
             $query .= ", fldDescription = ?";
         }
         
+        if ($approved) {
+            $query .= ", fldApproved = ?";
+        }
+        
         $query .= ", fnkTownId = ?";
         
         if ($update) { // IMPORTANT: do not forget to add this to UPDATE queries
@@ -372,7 +388,7 @@ if (isset($_POST['btnSubmit'])) {
         $message.= "<p>A copy of the information appears below.</p>";
 
         foreach ($_POST as $key => $value) {
-            if ($key != 'btnSubmit') {
+            if ($key != 'btnSubmit' AND $key != 'chkApproved') {
                 $message.= "<p>";
                 $camelCase = preg_split('/(?=[A-Z])/', substr($key, 3));
 
@@ -598,7 +614,21 @@ if (isset($_POST['btnSubmit'])) {
                     </textarea>
                     
                 </fieldset> <!-- end optional-info -->
-
+                
+                <?php
+                // If user is admin, print preapprove checkbox
+                if (adminCheck($thisDatabaseReader, $username)) {
+                    print '<fieldset class="admin-only">';
+                    print '<legend>Administrative</legend>';
+                    print '<label><input type="checkbox" id="chkApproved"';
+                    print 'name="chkApproved" value="Approved"';
+                    if ($approved) print " checked ";
+                    print 'tabindex="700">Preapprove activity</label>';
+                    print '</fieldset>';
+                }
+                
+                ?> 
+                
                 <fieldset class="buttons">
                     <legend></legend>
                     <input type="submit" id="btnSubmit" name="btnSubmit" value="Submit" tabindex="900" class="button">
