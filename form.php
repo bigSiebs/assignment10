@@ -33,6 +33,7 @@ $yourURL = $domain . $phpSelf;
 $activityID = -1;
 
 $user = $username;
+$affiliation = "Student";
 
 $activityName = "";
 $category = "Select one";
@@ -47,7 +48,7 @@ $cost = "";
 $url = "";
 $comments = "";
 
-$approved = false;
+$approved = false; // not checked
 
 if (isset($_GET['activity']) AND adminCheck($thisDatabaseReader, $username)) { // ADMINS ONLY
     $activityID = (int) $_GET['activity'];
@@ -55,23 +56,24 @@ if (isset($_GET['activity']) AND adminCheck($thisDatabaseReader, $username)) { /
     // Build query to get info from database
     $query = "SELECT fldName, fldCategory, fldOnCampus, fnkSubmitNetId,";
     $query .= " fldTownName, fldState, fldDistance,";
-    $query .= " fldLocation, fldCost, fldURL, fldDescription";
-    $query .= " fldApproved";
+    $query .= " fldLocation, fldCost, fldURL, fldDescription,";
+    $query .= " fldApproved, fldAffiliation";
     $query .= " FROM tblActivities";
     $query .= " INNER JOIN tblTowns ON pmkTownId = fnkTownId";
+    $query .= " INNER JOIN tblAffiliates ON pmkNetId = fnkSubmitNetId";
     $query .= " WHERE pmkActivityId = ?";
     $data = array($activityID);
-    
+
     // Fetch data from database
     $info = $thisDatabaseReader->select($query, $data, 1, 0, 0, 0, false, false);
 
     // If array is not empty (ie, activity ID was valid)
     if ($info) {
         $edit = true; // use UPDATE query instead of INSERT
-        
         // All info will be in first array of array
-        
+
         $user = $info[0]['fnkSubmitNetId'];
+        $affiliation = $info[0]['fldAffiliation'];
 
         $activityName = $info[0]['fldName'];
         $category = $info[0]['fldCategory'];
@@ -80,13 +82,13 @@ if (isset($_GET['activity']) AND adminCheck($thisDatabaseReader, $username)) { /
         $town = $info[0]['fldTownName'];
         $state = $info[0]['fldState'];
         $distance = $info[0]['fldDistance'];
-        
+
         $location = $info[0]['fldLocation'];
         $cost = $info[0]['fldCost'];
         $url = $info[0]['fldURL'];
         $comments = $info[0]['fldDescription'];
-        
-        $approved = $info[0]['fldApproved'];
+
+        $approved = $info[0]['fldApproved']; // int cast to boolean
     }
 }
 
@@ -143,9 +145,11 @@ if (isset($_POST['btnSubmit'])) {
     } else {
         $update = false;
     }
-    
+
     $user = htmlentities($_POST['txtUsername'], ENT_QUOTES, "UTF-8");
     $activityData[] = $user;
+
+    $affiliation = htmlentities($_POST['radAffiliation'], ENT_QUOTES, "UTF-8");
 
     $activityName = htmlentities($_POST['txtActivityName'], ENT_QUOTES, "UTF-8");
     $activityData[] = $activityName;
@@ -166,30 +170,30 @@ if (isset($_POST['btnSubmit'])) {
 
     $state = $_POST['lstState'];
     $townData[] = $state;
-    
+
     $distance = htmlentities($_POST['txtDistance'], ENT_QUOTES, "UTF-8");
     $townData[] = $distance;
-    
+
     $location = htmlentities($_POST['txtLocation'], ENT_QUOTES, "UTF-8");
     if ($location != "") {
         $activityData[] = $location;
     }
-    
+
     $cost = htmlentities($_POST['txtCost'], ENT_QUOTES, "UTF-8");
     if ($cost != "") {
         $activityData[] = $cost;
     }
-    
+
     $url = htmlentities($_POST['txtURL'], ENT_QUOTES, "UTF-8");
     if ($url != "") {
-        $activityData[] = $url;      
+        $activityData[] = $url;
     }
 
     $comments = htmlentities($_POST['txtComments'], ENT_QUOTES, "UTF-8");
-    if ($comments != "" ) {
-        $activityData[] = $comments;        
+    if ($comments != "") {
+        $activityData[] = $comments;
     }
-    
+
     // Saved as 0/1 for database
     if (isset($_POST["chkApproved"])) {
         $approved = 1;
@@ -230,7 +234,7 @@ if (isset($_POST['btnSubmit'])) {
         $errorMsg[] = "The town name appears to include invalid characters.";
         $townError = true;
     }
-    
+
     if ($distance == "") {
         $errorMsg[] = "Please enter the town's distance from UVM.";
         $distanceError = true;
@@ -238,27 +242,27 @@ if (isset($_POST['btnSubmit'])) {
         $errorMsg[] = "The value entered for the distance must be strictly numeric.";
         $distanceError = true;
     }
-    
+
     // Location field can be blank
-    if ($location != "" AND !verifyAlphaNum($location)) {
+    if ($location != "" AND ! verifyAlphaNum($location)) {
         $errorMsg[] = "The location info appears to contain invalid characters.";
         $locationError = true;
     }
-    
+
     // cost field can be blank
-    if ($cost != "" AND !verifyNumeric($cost)) {
+    if ($cost != "" AND ! verifyNumeric($cost)) {
         $errorMsg[] = "The cost must be a number.";
         $costError = true;
     }
-    
+
     // URL field can be blank
-    if ($url  != "" AND !filter_var($url, FILTER_VALIDATE_URL)) {
+    if ($url != "" AND ! filter_var($url, FILTER_VALIDATE_URL)) {
         $errorMsg[] = "The URL you've provided is invalid.";
         $urlError = true;
     }
-    
+
     // Description field can be blank
-    if ($comments != "" AND !verifyAlphaNum($comments)) {
+    if ($comments != "" AND ! verifyAlphaNum($comments)) {
         $errorMsg[] = "Your comments contain invalid characters.";
         $commentsError = true;
     }
@@ -280,28 +284,24 @@ if (isset($_POST['btnSubmit'])) {
         $townSelectQuery .= " WHERE fldTownName = ? AND";
         $townSelectQuery .= " fldState = ?";
         $townSelectData = array($town, $state);
-        
-        $townSelect = $thisDatabaseReader->select($townSelectQuery, $townSelectData,
-                1, 1, 0, 0, false, false);
-        
-        if($townSelect) { // If not empty, grab ID
+
+        $townSelect = $thisDatabaseReader->select($townSelectQuery, $townSelectData, 1, 1, 0, 0, false, false);
+
+        if ($townSelect) { // If not empty, grab ID
             $townID = $townSelect[0]['pmkTownId'];
-        
-            
         } else {
             $townInsertQuery = "INSERT INTO tblTowns SET";
             $townInsertQuery .= " fldTownName = ?,";
             $townInsertQuery .= " fldState = ?,";
             $townInsertQuery .= " fldDistance = ?";
-            
-            $townInsert = $thisDatabaseWriter->insert($townInsertQuery, $townData,
-                    0, 0, 0, 0, false, false);
-            
+
+            $townInsert = $thisDatabaseWriter->insert($townInsertQuery, $townData, 0, 0, 0, 0, false, false);
+
             if ($townInsert) {
                 $townID = $thisDatabaseWriter->lastInsert(); // keep after debug
             }
         }
-        
+
         // Add pmkTownId for town to array
         $activityData[] = $townID;
 
@@ -311,75 +311,80 @@ if (isset($_POST['btnSubmit'])) {
         } else {
             $query = "INSERT INTO tblActivities SET";
         }
-        
+
         $query .= " fnkSubmitNetId = ?,";
         $query .= " fldName = ?,";
         $query .= " fldCategory = ?,";
         $query .= " fldOnCampus = ?";
-        
+
         if ($location != "") {
             $query .= ", fldLocation = ?";
         }
-        
+
         if ($cost != "") {
             $query .= ", fldCost = ?";
         }
-        
+
         if ($url != "") {
             $query .= ", fldURL =?";
         }
-        
+
         if ($comments != "") {
             $query .= ", fldDescription = ?";
         }
-        
+
         if ($approved) {
             $query .= ", fldApproved = ?";
         }
-        
+
         $query .= ", fnkTownId = ?";
-        
+
         if ($update) { // IMPORTANT: do not forget to add this to UPDATE queries
             $query .= " WHERE pmkActivityId = ?";
             $activityData[] = $activityID;
-            
+
             $activity = $thisDatabaseWriter->update($query, $activityData, 1, 0, 0, 0, false, false);
-        
-            
         } else {
             $activity = $thisDatabaseWriter->insert($query, $activityData, 0, 0, 0, 0, false, false);
-            
+
             // Need to create vote so that record can be ordered
             $lastActivityID = $thisDatabaseWriter->lastInsert();
-            
+
             // By default, vote score = 0
             $voteInsertQuery = "INSERT INTO tblVotes SET";
             $voteInsertQuery .= " fnkNetId = ?,";
             $voteInsertQuery .= " fnkActivityId = ?";
             $voteInsertData = array($user, $lastActivityID);
-            
-            $vote = $thisDatabaseWriter->insert($voteInsertQuery, $voteInsertData,
-                    0, 0, 0, 0, false, false);
+
+            $vote = $thisDatabaseWriter->insert($voteInsertQuery, $voteInsertData, 0, 0, 0, 0, false, false);
         }
-        
+
         // No matter what, check if user is in table already
-        $userSelectQuery = "SELECT pmkNetId";
+        $userSelectQuery = "SELECT pmkNetId, fldAffiliation";
         $userSelectQuery .= " FROM tblAffiliates";
         $userSelectQuery .= " WHERE pmkNetId = ?";
         $userSelectData = array($user);
-        
-        $userSelect = $thisDatabaseReader->select($userSelectQuery, $userSelectData,
-                1, 0, 0, 0, false, false);
-        
+
+        $userSelect = $thisDatabaseReader->select($userSelectQuery, $userSelectData, 1, 0, 0, 0, false, false);
+
         if (!$userSelect) { // if user select query is empty
             $userInsertQuery = "INSERT INTO tblAffiliates SET";
             $userInsertQuery .= " pmkNetId = ?";
-            $userInsertData = array($user);
-            
-            $userInsert = $thisDatabaseWriter->insert($userInsertQuery, $userInsertData,
-                    0, 0, 0, 0, false, false);
-        }
+            $userInsertQuery .= ", fldAffiliation = ?";
+            $userData = array($user, $affiliation); 
+
+            $userInsert = $thisDatabaseWriter->insert($userInsertQuery, $userData, 0, 0, 0, 0, false, false);
         
+            
+        } else if ($userSelect[0]["fldAffiliation"] != $affiliation) {
+            $userUpdateQuery = "UPDATE tblAffiliates SET";
+            $userUpdateQuery .= " fldAffiliation = ?";
+            $userUpdateQuery .= " WHERE pmkNetId = ?";
+            $userData = array($affiliation, $user);
+
+            $userUpdate = $thisDatabaseWriter->update($userUpdateQuery, $userData, 1, 0, 0, 0, false, false);
+        }
+
         // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
         //
         // SECTION 2f: Create message
@@ -411,8 +416,7 @@ if (isset($_POST['btnSubmit'])) {
         $from = "UVM Activities <jsiebert@uvm.edu>";
 
         // subject of mail should match form
-        $todaysDate = strftime("%x");
-        $subject = "Thanks for submitting a new UVM Activity, " . $todaysDate;
+        $subject = "Thanks for contributing to UVM diddit!";
 
         $mailed = sendMail($to, $cc, $bcc, $from, $subject, $message);
     } // ends form is valid
@@ -426,52 +430,52 @@ if (isset($_POST['btnSubmit'])) {
 <article>
     <h2>Form</h2>
 
-    <?php
+<?php
 // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
 //
-    // SECTION 3a
+// SECTION 3a
 // If its the first time coming to form or there are errors, display form.
-    if (isset($_POST["btnSubmit"]) AND empty($errorMsg)) { // closing marked with 'end body submit'
-        print "<h2>Your request has ";
+if (isset($_POST["btnSubmit"]) AND empty($errorMsg)) { // closing marked with 'end body submit'
+    print "<h2>Your request has ";
 
-        if (!$mailed) {
-            print 'not ';
-        }
+    if (!$mailed) {
+        print 'not ';
+    }
 
-        print "been processed.</h2>";
+    print "been processed.</h2>";
 
-        if ($mailed) {
-            print "<p>A copy of this message has been sent to: " . $email . ".</p>";
-            print "<p>Mail message:</p>";
-            print $message;
-        }
-    } else {
+    if ($mailed) {
+        print "<p>A copy of this message has been sent to: " . $email . ".</p>";
+        print "<p>Mail message:</p>";
+        print $message;
+    }
+} else {
 
 
-        // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
-        //
+    // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
+    //
         // SECTION 3b: Error messages: Display any error message before we print form
 
-        if ($errorMsg) {
-            print '<div class="errors">';
-            print "<ol>\n";
-            foreach ($errorMsg as $err) {
-                print "\t<li>" . $err . "</li>\n";
-            }
-            print "</ol>\n";
-            print "</div>";
+    if ($errorMsg) {
+        print '<div class="errors">';
+        print "<ol>\n";
+        foreach ($errorMsg as $err) {
+            print "\t<li>" . $err . "</li>\n";
         }
+        print "</ol>\n";
+        print "</div>";
+    }
 
-        // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
-        //
+    // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
+    //
         // SECTION 3c: HTML form: Display HTML form
-        // Action is to this same page. $phpSelf is defined in top.php
-        /* Note lines like: value="<?php print $email; ?> 
-         * These make the form sticky by displaying the default value or
-         * the value that was typed in previously.
-         * Also note lines like <?php if ($emailERROR) print 'class="mistake"'; ?> 
-         * These allow us to use CSS to identify errors with style. */
-        ?>
+    // Action is to this same page. $phpSelf is defined in top.php
+    /* Note lines like: value="<?php print $email; ?> 
+     * These make the form sticky by displaying the default value or
+     * the value that was typed in previously.
+     * Also note lines like <?php if ($emailERROR) print 'class="mistake"'; ?> 
+     * These allow us to use CSS to identify errors with style. */
+    ?>
 
         <form action="<?php print $phpSelf; ?>"
               method="post"
@@ -483,110 +487,143 @@ if (isset($_POST['btnSubmit'])) {
 
                 <fieldset class="basic-info">
                     <legend>Basic Information</legend>
-                    
+
                     <input type="hidden" id="hidActivityId" name="hidActivityId"
-                       value="<?php print $activityID; ?>"
-                       >
-                    
+                           value="<?php print $activityID; ?>"
+                           >
+
                     <label for="txtUsername" class="required">NetID
                         <input type="text" id="txtUsername" name="txtUsername"
                                value="<?php print $user; ?>"
                                tabindex="100" maxlength="45"
-                               <?php if (!adminCheck($thisDatabaseReader, $username))
-                                       print 'readonly'; ?>
+    <?php if (!adminCheck($thisDatabaseReader, $username))
+        print 'readonly';
+    ?>
                                class="no-edit 
-                               <?php if ($userError) print ' mistake'; ?>"
+    <?php if ($userError) print ' mistake'; ?>"
                                onfocus="this.select()"
                                autofocus>
                     </label>
+
+                    <fieldset class="radio">
+                        <legend>Which of the following describes your relation to UVM?</legend>
+                               <?php
+                               // Array for unique values in each block
+                               $radioButtons = array(
+                                   array("radAffiliationStudent", "Student"),
+                                   array("radAffiliationAlumni", "Alumni"),
+                                   array("radAffiliationFacultyStaff", "Faculty/Staff"),
+                                   array("radAffiliationOther", "Other")
+                               );
+
+                               // Variable for tabIndex
+                               $tabIndex = 150;
+
+                               foreach ($radioButtons as $button) {
+                                   print "\n\t\t" . '<label><input type="radio"';
+                                   print "\n\t\t\t" . 'id="' . $button[0] . '"';
+                                   print "\n\t\t\t" . 'name="radAffiliation"';
+                                   print "\n\t\t\t" . 'value="' . $button[1] . '"';
+                                   if ($affiliation == $button[1]) {
+                                       print "\n\t\t\tchecked";
+                                   }
+                                   print "\n\t\t\t" . 'tabindex="';
+                                   print strval($tabIndex) . '">';
+                                   print $button[1];
+                                   print "</label>";
+
+                                   $tabIndex+= 10;
+                               }
+                               ?>
+                    </fieldset> <!-- end radio -->
 
                     <label for="txtActivityName" class="required">Activity Name
                         <input type="text" id="txtActivityName" name="txtActivityName"
                                value="<?php print $activityName; ?>"
                                tabindex="110" maxlength="255" 
-                               <?php if ($activityNameError) print 'class="mistake"'; ?>
+                        <?php if ($activityNameError) print 'class="mistake"'; ?>
                                onfocus="this.select()"
                                autofocus>
                     </label>
 
                     <label for="lstCategory">Category</label>
                     <select id="lstCategory" name="lstCategory"
-                        <?php if ($categoryError) print 'class="mistake"'; ?>
-                                tabIndex="200">
-                                    <?php
-                                    // Array for listbox options
-                                    $categoryChoices = array("Select one", "Outdoor", "School-Related", "Social");
+    <?php if ($categoryError) print 'class="mistake"'; ?>
+                            tabIndex="200">
+                               <?php
+                               // Array for listbox options
+                               $categoryChoices = array("Select one", "Outdoor", "School-Related", "Social");
 
-                                    foreach ($categoryChoices as $choice) {
-                                        print "\n\t\t\t" . "<option ";
-                                        if ($category == $choice) {
-                                            print 'selected ';
-                                        }
-                                        print 'value="' . $choice . '">' . $choice . "</option>";
-                                        print "\n";
-                                    }
-                                    ?>
+                               foreach ($categoryChoices as $choice) {
+                                   print "\n\t\t\t" . "<option ";
+                                   if ($category == $choice) {
+                                       print 'selected ';
+                                   }
+                                   print 'value="' . $choice . '">' . $choice . "</option>";
+                                   print "\n";
+                               }
+                               ?>
                     </select>
 
                     <label><input type="checkbox" 
-                                      id="chkOnCampus" 
-                                      name="chkOnCampus" 
-                                      value="On Campus"
-                                      <?php if ($onCampus) print " checked "; ?>
-                                      tabindex="300">Is this activity on campus?</label>
+                                  id="chkOnCampus" 
+                                  name="chkOnCampus" 
+                                  value="On Campus"
+                                <?php if ($onCampus) print " checked "; ?>
+                                  tabindex="300">Is this activity on campus?</label>
                 </fieldset> <!-- end basic-info -->
-                
+
                 <fieldset class="location-info">
                     <legend>Location Information</legend>
                     <label for="txtTown" class="required">Town
                         <input type="text" id="txtTown" name="txtTown"
                                value="<?php print $town; ?>"
                                tabindex="400" maxlength="255" 
-                               <?php if ($townError) print 'class="mistake"'; ?>
+    <?php if ($townError) print 'class="mistake"'; ?>
                                onfocus="this.select()"
                                autofocus>
                     </label>
 
                     <label for="lstState">State</label>
                     <select id="lstState" name="lstState" tabIndex="410">
-                        <?php
-                        // Array for listbox options
-                        $stateChoices = array("MA", "NH", "NY", "QC", "VT");
+    <?php
+    // Array for listbox options
+    $stateChoices = array("MA", "NH", "NY", "QC", "VT");
 
-                        foreach ($stateChoices as $choice) {
-                            print "\n\t\t\t" . "<option ";
-                            if ($state == $choice) {
-                                print 'selected ';
-                            }
-                            print 'value="' . $choice . '">' . $choice . "</option>";
-                            print "\n";
-                        }
-                        ?>
+    foreach ($stateChoices as $choice) {
+        print "\n\t\t\t" . "<option ";
+        if ($state == $choice) {
+            print 'selected ';
+        }
+        print 'value="' . $choice . '">' . $choice . "</option>";
+        print "\n";
+    }
+    ?>
                     </select>
-                    
+
                     <label for="txtDistance" class="required">Distance from Burlington (in miles)
                         <input type="text" id="txtDistance" name="txtDistance"
                                value="<?php print $distance; ?>"
                                tabindex="420" maxlength="255" 
-                               <?php if ($distanceError) print 'class="mistake"'; ?>
+                        <?php if ($distanceError) print 'class="mistake"'; ?>
                                onfocus="this.select()"
                                autofocus>
                     </label>
 
                 </fieldset> <!-- end location-info -->
-                
+
                 <fieldset class="optional-info">
                     <legend>Optional Information</legend>
-                    
+
                     <label for="txtLocation" class="required">Location Description
                         <input type="text" id="txtLocation" name="txtLocation"
                                value="<?php print $location; ?>"
                                tabindex="500" maxlength="255" 
-                               <?php if ($locationError) print 'class="mistake"'; ?>
+    <?php if ($locationError) print 'class="mistake"'; ?>
                                onfocus="this.select()"
                                autofocus>
                     </label>
-                    
+
                     <label for="txtCost" class="required">Cost to Participate
                         <input type="text" id="txtCost" name="txtCost"
                                value="<?php print $cost; ?>"
@@ -595,7 +632,7 @@ if (isset($_POST['btnSubmit'])) {
                                onfocus="this.select()"
                                autofocus>
                     </label>
-                    
+
                     <label for="txtURL" class="required">URL
                         <input type="text" id="txtURL" name="txtURL"
                                value="<?php print $url; ?>"
@@ -604,31 +641,31 @@ if (isset($_POST['btnSubmit'])) {
                                onfocus="this.select()"
                                autofocus>
                     </label>
-                    
+
                     <label for="txtComments" class="required">Description</label>
                     <textarea id="txtComments"
-                                  name="txtComments"
-                                  tabindex="600"
-                                  <?php if ($commentsError) print 'class="mistake"'; ?>
-                                  onfocus="this.select()"><?php print $comments; ?>
+                              name="txtComments"
+                              tabindex="600"
+                               <?php if ($commentsError) print 'class="mistake"'; ?>
+                              onfocus="this.select()"><?php print $comments; ?>
                     </textarea>
-                    
+
                 </fieldset> <!-- end optional-info -->
-                
-                <?php
-                // If user is admin, print preapprove checkbox
-                if (adminCheck($thisDatabaseReader, $username)) {
-                    print '<fieldset class="admin-only">';
-                    print '<legend>Administrative</legend>';
-                    print '<label><input type="checkbox" id="chkApproved"';
-                    print 'name="chkApproved" value="Approved"';
-                    if ($approved) print " checked ";
-                    print 'tabindex="700">Preapprove activity</label>';
-                    print '</fieldset>';
-                }
-                
-                ?> 
-                
+
+    <?php
+    // If user is admin, print preapprove checkbox
+    if (adminCheck($thisDatabaseReader, $username)) {
+        print '<fieldset class="admin-only">';
+        print '<legend>Administrative</legend>';
+        print '<label><input type="checkbox" id="chkApproved"';
+        print 'name="chkApproved" value="Approved"';
+        if ($approved)
+            print " checked ";
+        print 'tabindex="700">Preapprove activity</label>';
+        print '</fieldset>';
+    }
+    ?> 
+
                 <fieldset class="buttons">
                     <legend></legend>
                     <input type="submit" id="btnSubmit" name="btnSubmit" value="Submit" tabindex="900" class="button">
@@ -637,9 +674,9 @@ if (isset($_POST['btnSubmit'])) {
             </fieldset> <!-- end wrapper! -->
         </form> <!-- end form! -->
 
-        <?php
-    } // end body submit
-    ?>
+    <?php
+} // end body submit
+?>
 
 </article>
 

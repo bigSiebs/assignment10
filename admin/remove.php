@@ -72,7 +72,28 @@ include "../top.php";
         print "<p>Activity " . $activityID . " and its relational records have been removed.";
         
     } else if ($activityID == "") { // If activity has not been selected
-        print "<p>A valid activity has not been selected.</p>";
+        print "<p>A valid activity has not been selected. A list of all activities appears below. Please select the item you'd like to remove.</p>";
+        
+        $query = "SELECT pmkActivityId, fldName";
+        $query .= " FROM tblActivities";
+        $query .= " ORDER BY fldDateSubmitted";
+        
+        $selectAll = $thisDatabaseReader->select($query, "", 0, 1, 0, 0, false, false);
+        
+        print "<section>";
+        print '<ul>';
+        
+        foreach ($selectAll as $record) {
+            $appendURL = "?activity=" . $record['pmkActivityId'];
+            
+            print '<li>';
+            print '<a href="' . $appendURL . '">';
+            print $record['fldName'];
+            print '</a>';
+            print '</li>';
+        }
+        
+        print "</section>";
     
         
     } else if ($info) { // if valid activity
