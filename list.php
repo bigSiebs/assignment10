@@ -2,7 +2,56 @@
 
 include "top.php";
 
+$numberRecords = 10;
+
 print "<article>";
+print "<h2>The List</h2>";
+print "<p>You can click on the names of the activities to get more information.";
+print " Please feel free to vote up or down activities you've done before.</p>";
+
+// Simple query to count records
+$queryTotal = "SELECT COUNT(fldName) AS count";
+$queryTotal .= " FROM tblActivities";
+$queryTotal .= " WHERE fldApproved = ?";
+$totalData = array(1);
+
+// SELECT all records
+$total = $thisDatabaseReader->select($queryTotal, $totalData, 1, 0, 0, 0, false, false);
+
+// Make sure to set query number as int for security
+if (isset($_GET['start']) AND ($_GET['start'] > 0
+        AND ($_GET['start'] < $total[0]['count']))) {
+    $startRecord = (int) $_GET['start'];
+} else {
+    $startRecord = 0;
+}
+
+print '<div class="text-center">';
+print '<h4>Displaying records ';
+
+print ($startRecord + 1) . ' - ';
+if ($startRecord + $numberRecords > $total[0]['count']) {
+    print $total[0]['count'];
+} else {
+    print $startRecord + $numberRecords;
+}
+print ' of ' . $total[0]['count'] . '</h4>';
+
+print '<ol class="menu text-center">';
+print '<li';
+if ($startRecord - $numberRecords < 0) {
+    print ' class="unavailable"';
+}
+print '><a href="?start=' . ($startRecord - $numberRecords) . '">';
+print 'Previous</a></li>';
+print '<li';
+if ($startRecord + $numberRecords >= $total[0]['count']) {
+    print ' class="unavailable"';
+}
+print '><a href="?start=' . ($startRecord + $numberRecords) . '">';
+print 'Next</a></li>';
+print '</ol>';
+print '</div>';
 
 // Get activity ID
 if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
@@ -13,8 +62,6 @@ if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
         $activityID = (int) htmlentities($_POST["hidActivityId"], ENT_QUOTES, "UTF-8");
         $vote = -1;
     }
-    
-    print '<section>';
 
     // Query database looking for activity ID
     $checkActivityQuery = "SELECT pmkActivityId";
@@ -68,7 +115,9 @@ if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
             $inserted = $thisDatabaseWriter->insert($insertQuery, $insertData, 0, 0, 0, 0, false, false);
 
             if ($inserted) {
+                print '<section class="panel success-panel">';
                 print "<p>Your vote has been tallied. Thanks for voting!</p>";
+                print '</section>';
             }
             
         } else {
@@ -77,9 +126,13 @@ if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
             
             // Check that new vote won't exceed 1 or fall below -1
             if ($newVote > 1) { // Vote exceeds max
+                print '<section class="panel alert-panel">';
                 print "<p>Sorry, you cannot upvote this activity again.</p>";
+                print '</section>';
             } else if ($newVote < -1) { // Vote falls below min
+                print '<section class="panel alert-panel">';
                 print "<p>Sorry, you cannot downvote this activity again.</p>";
+                print '</section>';
             } else { // vote is valid
                 $updateQuery = " UPDATE tblVotes SET";
                 $updateQuery .= " fldVote = ?";
@@ -90,14 +143,14 @@ if (isset($_POST['btnUpVote']) OR isset($_POST['btnDownVote'])) {
                 $updated = $thisDatabaseWriter->update($updateQuery, $updateData, 1, 1, 0, 0, false, false);
                 
                 if ($updated) {
+                    print '<section class="panel success-panel">';
                     print "<p>Your vote has been changed. Thanks for voting!</p>";
+                    print '</section>';
                 }
             }
         }
     }
 }
-
-print "</section>";
 
 // NEED TO ADD LIMIT CLAUSE
 $query = "SELECT pmkActivityId, fldName, fldCategory, fldOnCampus, fldTownName, fldState";
@@ -107,8 +160,9 @@ $query .= " INNER JOIN tblVotes V ON A.pmkActivityId = V.fnkActivityId";
 $query .= " INNER JOIN tblTowns T ON A.fnkTownId = T.pmkTownId";
 $query .= " WHERE fldApproved = 1";
 $query .= " GROUP BY A.fldName";
-$query .= " ORDER BY SUM(fldVote) DESC LIMIT 10";
-$data = array();
+$query .= " ORDER BY SUM(fldVote) DESC";
+$query .= " LIMIT " . $numberRecords . " OFFSET " . $startRecord;
+$data = array(""); // for some reason, variables don't work in array for this
 $val = array(1, 1, 0, 0);
 
 // Call select method
@@ -126,12 +180,13 @@ $rank = 1;
 // For loop to print records
 foreach ($info as $record) {
     print '<div id="dropdown-' . $rank . '" ';
-    print 'class="dropdown dropdown-processed">';
+    print 'class="panel dropdown dropdown-processed">';
     
     // ** Add vote buttons **//
     // Add upvote form/button
     print '<form action="' . $phpSelf . '" method="post" ';
-    print 'id="frmVote-' . $record['pmkActivityId'] . '">';
+    print 'id="frmVote-' . $record['pmkActivityId'] . '" ';
+    print 'class="float-left">';
     
     // Add hidden field to hold activity ID
     print '<fieldset class="vote-button">';
@@ -169,7 +224,7 @@ foreach ($info as $record) {
     print '</p>';
     
     print '<div class="dropdown-container" style="display: none;">';
-    print '<ol>';
+    print '<ol class="no-bullet">';
     print '<li><b>Submitted by:</b> ' . $record['fnkSubmitNetId'] . '</li>';
     print '<li><b>Category:</b> ' . $record['fldCategory'] . '</li>';
     print '<li><b>On Campus?</b> ';
@@ -183,23 +238,26 @@ foreach ($info as $record) {
     if ($record['fldDistance'] != 0) {
         print '<li><b>Distance from Burlington:</b> ~' . $record['fldDistance'] . ' miles</li>';
     }
-    print '<li><b>Cost:</b> ';
     if ($record['fldCost'] == 0 AND $record['fldCost'] != "") {
-        print "FREE";
-    } else {
-        print '$' . $record['fldCost'] . '</li>';
+        print "<li><b>Cost:</b> FREE";
+    } else if($record['fldCost'] != "") {
+        print '<li><b>Cost:</b> $' . $record['fldCost'] . '</li>';
+        
     }
     if ($record['fldURL'] != '') {
         print '<li><b>URL:</b> <a href="' . $record['fldURL'] . '">Click here</a></li>';
     }
-    print '<li><b>Description:</b> ' . $record['fldDescription'] . '</li>';
+    if ($record['fldDescription'] != "") {
+        print '<li><b>Description:</b> ' . $record['fldDescription'] . '</li>';
+    }
+
     print '</ol></div></div>';
 
     $rank++;
 }
 
 if (adminCheck($thisDatabaseReader, $username)) {
-    print "<section>";
+    print '<section class="panel">';
 
     print "<h2>For administrators</h2>";
     print '<p>Click <a href="' . $adminPath . 'approve.php">here</a>';

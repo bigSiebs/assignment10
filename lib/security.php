@@ -19,7 +19,7 @@ function securityCheck($path_parts, $yourURL, $form = false) {
     // add all your page names to this array
     $whiteListPages = array();
     $whiteListPages[] = "index.php";
-    $whiteListPages[] = "top-10.php";
+    $whiteListPages[] = "list.php";
     $whiteListPages[] = "form.php";
     $whiteListPages[] = "approve.php";
     $whiteListPages[] = "remove.php";

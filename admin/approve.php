@@ -5,9 +5,13 @@ include '../top.php';
 print "<article>";
 
 if (!adminCheck($thisDatabaseReader, $username)) {
-    print "<h2>Sorry.</h2>";
+    print '<section class="panel alert-panel">';
+    print "<h4>Sorry.</h4>";
     print "<p>You don't have access to this page.</p>";
+    print '</section>';
 } else {
+    print "<h2>Unapproved Activities</h2>";
+    
     if (isset($_GET['activity'])) {
         $activityID = (int) $_GET['activity'];
 
@@ -27,9 +31,7 @@ if (!adminCheck($thisDatabaseReader, $username)) {
             }
         }
 
-        print '<section id="update-status">';
-
-        if ($validID) {
+        if ($validID) {        
             $update = " UPDATE tblActivities SET";
             $update .= " fldApproved = ?";
             $update .= " WHERE pmkActivityId = ?";
@@ -38,17 +40,19 @@ if (!adminCheck($thisDatabaseReader, $username)) {
             $updated = $thisDatabaseWriter->update($update, $updateData, 1, 0, 0, 0, false, false);
 
             if ($updated) {
+                print '<section class="panel success-panel">';
                 print "<p>Activity " . $activityID . " has been approved.</p>";
+                print '</section>';
             }
         } else {
+            print '<section class="panel alert-panel">';
             print "<p>Invalid activity ID.</p>";
+            print "</section>";
         }
 
-        print "</section>";
     }
-    print "<section>";
-
-    print "<h2>Unapproved Activities</h2>";
+    print '<section class="panel">';
+    
     print "<p>The following activities need to be approved:</p>";
 
     $query = "SELECT pmkActivityId, fldName, fldOnCampus, fldTownName, fldState";

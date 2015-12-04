@@ -1,111 +1,12 @@
 
-/*
-Reference for element widths and margins
-
-WIDTHS ////////////////////////////////
-
-one-column
-width: 18.3739%; /*  180.8px / 984px = 0.183739
-
-two
-width: 38.7804%; /* 381.6px / 984px = 0.387804
-
-three
-width: 59.1869%; /* 582.4px / 984px = 0.591869
-
-four
-width: 79.5934%; /* 783.2px / 984px = 0.795934
-
-five
-width: 100%
-
-MARGINS /////////////////////////////////
-
-starting left-column
-no margin-left
-
-second column
-margin-left: 20.4065%; /* 200.8px / 984px = 0.204065
-
-third column
-margin-left: 40.8028%; /* 401.6px / 984px = 0.408028
-
-fourth column
-margin-left: 61.2195%; /* 602.4 / 984px = 0.612195
-
-fifth column
-margin-left: 81.6260%; /* 803.2  / 984px = 0.816260
-*/
-
-* {
-  margin: 0;
-  padding: 0;
+.alert-panel {
+    background-color: rgba(240, 65, 36, 0.67) !important;
 }
 
-#page {
-    margin: 40px auto;
-    padding: 0 1em;
-    font-size: 16px;
-    max-width: 61.5em /* 984px / 16px = 61.5em */
+.success-panel {
+    background-color: rgba(67, 172, 106, 0.67) !important;
 }
 
-/* -------------- HEADER --------------- */
-header {
-    margin-bottom: 1em;
-}
-
-/* -------------- NAV ------------------ */
-
-nav {
-    margin-left: 0;
-    width: 18.3739%; /*  180.8px / 984px = 0.183739 */
-    float: left;
-}
-
-nav ol {
-    list-style-type: none;
-}
-
-/* -------------- ARTICLE --------------- */
-
-article {
-    margin-left: 20.4065%; /* 200.8px / 984px = 0.204065 */
-    width: 79.5934%; /* 783.2px / 984px = 0.795934 */
-}
-
-article table {
-    border: 1px solid black;
-}
-
-article table td, th {
-    padding: 0.5em;
-    border: 1px solid black;
-}
-
-/* -------------- FOOTER --------------- */
-
-footer {
-    margin-left: 0;
-    margin-top: 1em;
-    width: 100%;
-    clear: both;
-    text-align: center;
-}
-
-/* -------------- CLASSES --------------- */
-
-input.no-edit {
-    background-color: lightgray
-}
-
-div#overlay {
-   display: none;
-   position: fixed;
-   left: 0px;        /* This positions the element to the left most position */
-   top: 0px;         /* This positions the elment to the top most position */
-   width: 100%;      /* This makes the element take up 100% of the parents width */
-   height: 100%;     /* This makes the element take up 100% of the parents height */
-   background: #000; /* black */
-   opacity: 0.5;
-   z-index: 99999;   /* Change the z-index so it will be above everything else */
+.unavailable {
+    display: none !important;
 }
