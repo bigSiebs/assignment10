@@ -540,10 +540,9 @@ if (isset($_POST['btnSubmit'])) {
                                        tabindex="100" maxlength="45"
                                        <?php
                                        if (!adminCheck($thisDatabaseReader, $username))
-                                           print 'readonly';
-                                       ?>
-                                       class="no-edit
-                                       <?php if ($userError) print ' mistake'; ?>"
+                                            print 'readonly';
+                                       if ($userError)
+                                           print 'class="mistake"'; ?>
                                        onfocus="this.select()"
                                        autofocus>
                             </label>
@@ -590,7 +589,8 @@ if (isset($_POST['btnSubmit'])) {
                                 <input type="text" id="txtActivityName" name="txtActivityName"
                                        value="<?php print $activityName; ?>"
                                        tabindex="110" maxlength="255"
-                                       <?php if ($activityNameError) print 'class="mistake"'; ?>
+                                       <?php if ($activityNameError) 
+                                           print 'class="mistake"'; ?>
                                        onfocus="this.select()"
                                        autofocus>
                             </label>
