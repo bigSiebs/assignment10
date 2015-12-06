@@ -1,6 +1,30 @@
 
+a {
+    text-decoration: none;
+}
+
+footer {
+    border:none !important;
+}
+
+#banner {
+    width: 100%;
+}
+
+#head-callout {
+    margin-bottom: 0px;
+}
+
 .alert-panel {
     background-color: rgba(240, 65, 36, 0.67) !important;
+}
+
+.menu > li > a {
+    text-decoration: none;
+}
+
+.menu > li > a:hover {
+    color: #003300;
 }
 
 .mistake {
@@ -9,9 +33,14 @@
 }
 
 .success-panel {
-    background-color: rgba(67, 172, 106, 0.67) !important;
+    background-color: rgba(0, 102, 0, 0.5) !important;
 }
 
 .unavailable {
     display: none !important;
+}
+
+.vote-button {
+    padding-left: 0.5em !important;
+    padding-right: 0.5em !important;
 }

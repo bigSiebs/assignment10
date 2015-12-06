@@ -37,7 +37,7 @@ if ($startRecord + $numberRecords > $total[0]['count']) {
 }
 print ' of ' . $total[0]['count'] . '</h4>';
 
-print '<ol class="menu text-center">';
+print '<ol class="inline-list no-bullet">';
 print '<li';
 if ($startRecord - $numberRecords < 0) {
     print ' class="unavailable"';
@@ -175,12 +175,14 @@ if ($debug) {
     print "</pre></p>";
 }
 
-$rank = 1;
+$rank = $startRecord + 1;
 
 // For loop to print records
 foreach ($info as $record) {
     print '<div id="dropdown-' . $rank . '" ';
     print 'class="panel dropdown dropdown-processed">';
+    
+    print '<p class="float-left"><b>' . $rank . "</b></p>";
     
     // ** Add vote buttons **//
     // Add upvote form/button
@@ -216,7 +218,6 @@ foreach ($info as $record) {
         print 'Remove</a>] ';
     }
     
-    print $rank . '. ';
     print '<a class="dropdown-link" href="#">';
     print $record['fldName'];
     print '</a>';

@@ -203,6 +203,7 @@ if (isset($_POST['btnSubmit'])) {
         $activityData[] = $approved;
     } else {
         $approved = 0;
+        $activityData[] = $approved;
     }
 
     // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
@@ -339,11 +340,8 @@ if (isset($_POST['btnSubmit'])) {
             $query .= ", fldDescription = ?";
         }
 
-        if ($approved) {
-            $query .= ", fldApproved = ?";
-        }
-
-        // Add town ID
+        // Add approval and town ID
+        $query .= ", fldApproved = ?";
         $query .= ", fnkTownId = ?";
 
         // For updates
@@ -518,7 +516,7 @@ if (isset($_POST['btnSubmit'])) {
 
         <h2>Add an Activity to the List!</h2>
         <form action="<?php print $phpSelf; ?>"
-              method="post"
+              method="post" class="panel"
               id="frmAddActivity">
 
             <fieldset class="wrapper">
@@ -605,7 +603,17 @@ if (isset($_POST['btnSubmit'])) {
                                     tabIndex="200">
                                         <?php
                                         // Array for listbox options
-                                        $categoryChoices = array("Select one", "Outdoor", "School-Related", "Social", "Other");
+                                        $categoryChoices = array(
+                                            "Select one",
+                                            "Arts",
+                                            "Entertainment",
+                                            "Live",
+                                            "Outdoor",
+                                            "School-Related",
+                                            "Social",
+                                            "Sports",
+                                            "Winter",
+                                            "Other");
 
                                         foreach ($categoryChoices as $choice) {
                                             print "\n\t\t\t" . "<option ";

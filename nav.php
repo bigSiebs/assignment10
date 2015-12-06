@@ -1,49 +1,56 @@
 <!-- ######################     Main Navigation   ########################## -->
-<nav class="top-bar-left">
-    <ol class="menu text-center">
+<nav>
+    <ul class="header-subnav">
         <?php
         // This sets the current page to not be a link. Repeat this if block for
         //  each menu item
 
+
+        print '<li>';
+        print '<a href="' . $path . 'index.php"';
         if ($path_parts['filename'] == "index") {
-            print '<li class="menu-text">Home</li>';
-        } else {
-            print '<li><a href="' . $path . 'index.php">Home</a></li>';
+            print ' class="is-active"';
         }
+        print '>Home</a></li>';
 
+        print '<li>';
+        print '<a href="' . $path . 'list.php"';
         if ($path_parts['filename'] == "list") {
-            print '<li class="menu-text">The List</li>';
-        } else {
-            print '<li><a href="' . $path . 'list.php">The List</a></li>';
+            print ' class="is-active"';
         }
+        print '>The List</a></li>';
 
+        print '<li>';
+        print '<a href="' . $path . 'form.php"';
         if ($path_parts['filename'] == "form") {
-            print '<li class="menu-text">Add an Activity</li>';
-        } else {
-            print '<li><a href="' . $path . 'form.php">Add an Activity</a></li>';
+            print ' class="is-active"';
         }
+        print '>Add an Activity</a></li>';
 
+        print '<li>';
+        print '<a href="' . $path . 'about.php"';
         if ($path_parts['filename'] == "about") {
-            print '<li class="menu-text">About the List</li>';
-        } else {
-            print '<li><a href="' . $path . 'about.php">About the List</a></li>';
+            print ' class="is-active"';
         }
+        print '>About the List</a></li>';
 
         if (adminCheck($thisDatabaseReader, $username)) {
+            print '<li>';
+            print '<a href="' . $adminPath . 'approve.php"';
             if ($path_parts['filename'] == "approve") {
-                print '<li class="menu-text">Approve</li>';
-            } else {
-                print '<li><a href="' . $adminPath . 'approve.php">Approve</a></li>';
+                print ' class="is-active"';
             }
-            
+            print '>Approve</a></li>';
+
+            print '<li>';
+            print '<a href="' . $adminPath . 'remove.php"';
             if ($path_parts['filename'] == "remove") {
-                print '<li class="menu-text">Remove</li>';
-            } else {
-                print '<li><a href="' . $adminPath . 'remove.php">Remove</a></li>';
+                print ' class="is-active"';
             }
+            print '>Remove</a></li>';
         }
         ?>
-    </ol>
+    </ul>
 </nav>
 <!-- #################### Ends Main Navigation    ########################## -->
 

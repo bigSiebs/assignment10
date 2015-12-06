@@ -1,8 +1,12 @@
 <!-- %%%%%%%%%%%%%%%%%%%%%%     Page header   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<header>
-    <h1>UVM diddit</h1>
-    <h2>Things you must do before you graduate</h2>
+<header class="header">
+    <h1 class="main-header">UVM diddit</h1>
+    
+    <?php
+    include "nav.php";
+    ?>
+    
 </header>
 
 <!-- %%%%%%%%%%%%%%%%%%%%% Ends Page header   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->

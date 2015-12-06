@@ -149,11 +149,7 @@ require_once('lib/validation-functions.php');
     <?php
     print '<body id="' . $path_parts['filename'] . '">';
     
-    print '<div class="top-bar">';
-    include "nav.php";
-    print '</div>';
-    
-    print '<div class="callout large primary">';
+    print '<div class="row">';
     include "header.php";
     print '</div>';
     
