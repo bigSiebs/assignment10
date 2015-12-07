@@ -239,3 +239,5 @@ if (!adminCheck($thisDatabaseReader, $username)) {
         print "</table>";
     }
 }
+
+include "../footer.php";

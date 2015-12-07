@@ -7,6 +7,7 @@ include "top.php";
     <div class="row">
         <p>With so much to do and limited time to do it all, we wanted to help UVM students find fun and exciting activities amid their busy schedule.</p>
         <p>Our solution is to provide a reddit-like site detailing activities for college students in the Burlington area.</p>
+        <p>If you notice anything about the site that we should know about (e.g., inappropriate content, a feature that's not working), please let us know! We can be reached at <a href="mailto:jsiebert@uvm.edu">jsiebert@uvm.edu</a> or <a href="mailto:aychu@uvm.edu">aychu@uvm.edu</a>.</p>
     </div>
     <section id="about-us">
         <h3>The Coders</h3>
