@@ -1,5 +1,4 @@
 <?php
-
 include '../top.php';
 
 print "<article>";
@@ -14,6 +13,28 @@ if (!adminCheck($thisDatabaseReader, $username)) {
 
     print "<h2>Manage User Photos</h2>";
 
+    if (isset($_POST['btnRemove'])) {
+        $photoID = (int) htmlentities($_POST["hidPhotoId"], ENT_QUOTES, "UTF-8");
+
+        $removeQuery = "DELETE FROM tblPhotos";
+        $removeQuery .= " WHERE pmkPhotoID = ?";
+
+        // Same array for all queries
+        $removeData = array($photoID);
+
+        $deleted = $thisDatabaseWriter->delete($removeQuery, $removeData, 1, 0, 0, 0, false, false);
+
+        if ($deleted) {
+            print '<div class="panel success-panel">';
+            print "<p>Photo " . $photoID . " has been removed .</p>";
+            print '</div>';
+        } else {
+            print '<div class="panel alert-panel">';
+            print "<p>Unable to delete image record.</p>";
+            print '</div>';
+        }
+    }
+
     if (isset($_GET['activity'])) {
         $activityID = (int) ($_GET['activity']);
     } else {
@@ -21,8 +42,9 @@ if (!adminCheck($thisDatabaseReader, $username)) {
     }
 
     // Check to see if there are images for this activity
-    $checkQuery = "SELECT pmkPhotoId ";
+    $checkQuery = "SELECT pmkPhotoId, fldName ";
     $checkQuery .= "FROM tblPhotos ";
+    $checkQuery .= " INNER JOIN tblActivities ON fnkActivityId = pmkActivityId";
     $checkQuery .= " WHERE fnkActivityId = ?";
     $checkData = array($activityID);
 
@@ -44,19 +66,18 @@ if (!adminCheck($thisDatabaseReader, $username)) {
         $pending = $thisDatabaseReader->select($pendingQuery, $pendingData, 1, 0, 0, 0, false, false);
 
         print '<div class="panel">';
-        
+
         if (!$pending) {
             print "<p>No photos are pending approval.";
         } else {
 
             // Start printing table
             print '<table>';
-            
+
             print '<tr>';
-            
+
             $fields = array_keys($pending[0]);
             $headers = array_filter($fields, 'is_string'); // Picks up only str values
-            
             // Print headings
             foreach ($headers as $head) {
                 $camelCase = preg_split('/(?=[A-Z])/', substr($head, 3));
@@ -69,35 +90,33 @@ if (!adminCheck($thisDatabaseReader, $username)) {
             // add header columns for approve button
             print "<th>Approve</th>";
             print "</tr>";
-            
+
             // for loop to print each record in search query
             foreach ($pending as $record) {
-            $appendURL = '?activity=' . $record['pmkActivityId'];
-            $appendURL .= '&photo=' . $record['pmkPhotoId'];
-            $appendURL .= '&action=approve';
- 
-            // print the row
-            print '<tr>';
-            // Uses field names (AKA headers) as keys to pick from arrays
-            foreach ($headers as $field) {
-                if ($field == "fldFileName") {
-                    print '<td><a href="' .$path . 'uploads/' . $record[$field] . '">'
-                            . $record[$field] . '<a></td>';
-                } else {
-                    print '<td>' . $record[$field] . '</td>';
+                $appendURL = '?activity=' . $record['pmkActivityId'];
+                $appendURL .= '&photo=' . $record['pmkPhotoId'];
+                $appendURL .= '&action=approve';
+
+                // print the row
+                print '<tr>';
+                // Uses field names (AKA headers) as keys to pick from arrays
+                foreach ($headers as $field) {
+                    if ($field == "fldFileName") {
+                        print '<td><a href="' . $path . 'uploads/' . $record[$field] . '">'
+                                . $record[$field] . '</a></td>';
+                    } else {
+                        print '<td>' . $record[$field] . '</td>';
+                    }
                 }
-            }
-            // after printing out all fields, now links to approve
-            print '<td><a href="' . $appendURL . '">Approve</a></td>';
-            print '</tr>';
-            
-            
-        } // closes foreach ($unapproved as $record) loop
+                // after printing out all fields, now links to approve
+                print '<td><a href="' . $appendURL . '">Approve</a></td>';
+                print '</tr>';
+            } // closes foreach ($unapproved as $record) loop
             print "</table>";
         }
-        
+
         print '</section>';
-        
+
         print "<p>Users have submitted images for the following activities. Click any ";
         print "activity name to see them.</p>";
 
@@ -158,11 +177,27 @@ if (!adminCheck($thisDatabaseReader, $username)) {
 
                 print '</div>';
             } else if (($_GET['action']) == "remove") {
-                print "<p>Test remove</p>";
-            }
+                ?>
+
+                <form action="<?php print $phpSelf; ?>" method="post"
+                      id="frmRemove" class="panel">
+                    <fieldset class="wrapper">
+                        <legend><b>Please confirm your intent to remove photo 
+                                <?php print $photoID ?>.</b></legend>
+                        <input type="hidden" id="hidPhotoId" name="hidPhotoId"
+                               value="<?php print $photoID ?>"> 
+                        <input type="submit" id="btnRemove" name="btnRemove"
+                               value="Remove" tabindex="100"
+                               class="button alert">
+                    </fieldset>
+                </form>
+
+                <?php
+            } // end if form has not been pressed
         }
 
-
+        print '<h4>Activity: ' . $check[0]['fldName'] . '</h4>';
+        
         $photoQuery = "SELECT pmkPhotoId, fnkNetId, fldCaption, ";
         $photoQuery .= "fldFileName, fldApproved ";
         $photoQuery .= "FROM tblPhotos ";
@@ -210,7 +245,11 @@ if (!adminCheck($thisDatabaseReader, $username)) {
 
             foreach ($headers as $head) {
                 print '<td>';
-                if ($head == 'fldApproved') {
+                if ($head == 'fldFileName') {
+                    print '<a href="' . $path . 'uploads/' . $photo[$head] . '">'
+                                . $photo[$head] . '</a>';
+                
+                } else if ($head == 'fldApproved') {
                     print '<a href="' . $approvalLink . '">';
 
                     if ($action == "approve") {

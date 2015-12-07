@@ -138,7 +138,6 @@ require_once('lib/validation-functions.php');
         <link rel="stylesheet" href="<?php print $path; ?>css/styles.css"
               type="text/css" media="screen">
         <link rel="stylesheet" href="<?php print $path; ?>css/foundation.css" />
-        <link rel="stylesheet" href="<?php print $path; ?>css/app.css" />
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script src="<?php print $path; ?>js/show-info.js"></script>
