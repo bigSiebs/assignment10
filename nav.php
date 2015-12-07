@@ -32,7 +32,7 @@
         if ($path_parts['filename'] == "about") {
             print ' class="is-active"';
         }
-        print '>About the List</a></li>';
+        print '>About</a></li>';
 
         if (adminCheck($thisDatabaseReader, $username)) {
             print '<li>';
@@ -48,6 +48,13 @@
                 print ' class="is-active"';
             }
             print '>Remove</a></li>';
+            
+            print '<li>';
+            print '<a href="' . $adminPath . 'images.php"';
+            if ($path_parts['filename'] == "images") {
+                print ' class="is-active"';
+            }
+            print '>Manage Images</a></li>';
         }
         ?>
     </ul>

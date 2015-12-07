@@ -51,9 +51,10 @@ if (!adminCheck($thisDatabaseReader, $username)) {
         }
 
     }
-    print '<section class="panel">';
     
     print "<p>The following activities need to be approved:</p>";
+    
+    print '<section class="panel">';
 
     $query = "SELECT pmkActivityId, fldName, fldOnCampus, fldTownName, fldState";
     $query .= " FROM tblActivities A";
@@ -126,7 +127,7 @@ if (!adminCheck($thisDatabaseReader, $username)) {
     print "</section>";
 }
 
-print "</article";
+print "</article>";
 
 include '../footer.php';
 ?>

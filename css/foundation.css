@@ -2218,6 +2218,23 @@ select[multiple] {
     color: #333;
     transition: all .25s ease-in-out; }
 
+
+.inline-list {
+    list-style: none;
+    margin-top: 0;
+    margin-bottom: 0.94444rem;
+    margin-left: -1.22222rem;
+    margin-right: 0;
+    overflow: hidden;
+    padding: 0; }
+.inline-list > li {
+    display: block;
+    float: left;
+    list-style: none;
+    margin-left: 1.22222rem; }
+.inline-list > li > * {
+    display: block; }
+
 .label {
     display: inline-block;
     padding: 0.33333rem 0.5rem;

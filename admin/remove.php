@@ -52,24 +52,31 @@ include "../top.php";
             $query1 = "DELETE FROM tblActivities";
             $query1 .= " WHERE pmkActivityID = ?";
 
-            // QUERY 2 - deletes relational records
+            // QUERY 2 - deletes vote records
             $query2 = "DELETE FROM tblVotes";
             $query2 .= " WHERE fnkActivityID = ?";
+            
+            // QUERY 3 - deletes image records
+            $query3 = "DELETE FROM tblPhotos";
+            $query3 .= " WHERE fnkActivityID = ?";
 
+            // Same array for all queries
             $data = array($activityID);
-            //
-            //        $info1 = $thisDatabaseWriter->testquery($query1, $data, 1, 0, 0, 0, false, false);
-            //        $info2 = $thisDatabaseWriter->testquery($query2, $data, 1, 0, 0, 0, false, false);
-            $delete1 = $thisDatabaseWriter->delete($query1, $data, 1, 0, 0, 0, false, false);
-            $delete2 = $thisDatabaseWriter->delete($query2, $data, 1, 0, 0, 0, false, false);
 
-            if (!$delete1 OR ! $delete2) {
+            $delete1 = $thisDatabaseWriter->delete($query1, $data,
+                    1, 0, 0, 0, false, false);
+            $delete2 = $thisDatabaseWriter->delete($query2, $data,
+                    1, 0, 0, 0, false, false);
+            $delete3 = $thisDatabaseWriter->delete($query3, $data,
+                    1, 0, 0, 0, false, false);
+
+            if (!$delete1 OR !$delete2 OR !$delete3) {
                 print '<section class="panel alert-panel">';
                 print "<p>Oops, something went wrong.</p>";
                 print "</section>";
             }
 
-            if ($delete1 AND $delete2) {
+            if ($delete1 AND $delete2 AND $delete3) {
                 $deleted = true;
             } else {
                 $deleted = false;
@@ -81,8 +88,6 @@ include "../top.php";
             print "<p>Activity " . $activityID . " and its relational records have been removed.";
             print "</section>";
         } else if ($activityID == "") { // If activity has not been selected
-            print '<section class="panel">';
-
             print "<p>A valid activity has not been selected. A list of all activities appears below. Please select the item you'd like to remove.</p>";
 
             $query = "SELECT pmkActivityId, fldName";
@@ -90,6 +95,8 @@ include "../top.php";
             $query .= " ORDER BY fldDateSubmitted";
 
             $selectAll = $thisDatabaseReader->select($query, "", 0, 1, 0, 0, false, false);
+
+            print '<section class="panel">';
 
             print '<ul>';
 
@@ -102,6 +109,8 @@ include "../top.php";
                 print '</a>';
                 print '</li>';
             }
+
+            print '</ul>';
 
             print "</section>";
         } else if ($info) { // if valid activity
@@ -138,13 +147,13 @@ include "../top.php";
 
             print '<p>Removing this record will also remove the following votes.</p>';
 
-            $query = "SELECT fnkNetId, fnkActivityId, fldVote, fldDateVoted";
-            $query .= " FROM tblVotes";
-            $query .= " WHERE fnkActivityId = ?";
-            $query .= " ORDER BY fldDateVoted";
-            $data = array($activityID);
+            $voteQuery = "SELECT fnkNetId, fnkActivityId, fldVote, fldDateVoted";
+            $voteQuery .= " FROM tblVotes";
+            $voteQuery .= " WHERE fnkActivityId = ?";
+            $voteQuery .= " ORDER BY fldDateVoted";
+            $voteData = array($activityID);
 
-            $info2 = $thisDatabaseReader->select($query, $data, 1, 1, 0, 0, false, false);
+            $info2 = $thisDatabaseReader->select($voteQuery, $voteData, 1, 1, 0, 0, false, false);
 
             print '<table>';
 
@@ -180,6 +189,56 @@ include "../top.php";
             }
 
             print '</table>';
+
+            $photoQuery = "SELECT pmkPhotoId, fnkNetId, fldCaption, ";
+            $photoQuery .= "fldFileName, fldApproved ";
+            $photoQuery .= "FROM tblPhotos ";
+            $photoQuery .= "WHERE fnkActivityId = ?";
+            $photoData = array($activityID);
+
+            // Call select method
+            $info3 = $thisDatabaseReader->select($photoQuery, $photoData,
+                    1, 0, 0, 0, false, false);
+
+            if ($info3) {
+                print '<p>It will also remove the following image records.</p>';
+
+
+                print '<table>';
+
+                // Get fld names
+                $photoKeys = array_keys($info3[0]);
+                $photoFields = array_filter($photoKeys, 'is_string');
+
+                print "<tr>";
+
+                foreach ($photoFields as $field) {
+                    print "<th>";
+
+                    $camelCase = preg_split('/(?=[A-Z])/', substr($field, 3));
+
+                    $fieldName = "";
+
+                    foreach ($camelCase as $oneWord) {
+                        $fieldName .= $oneWord . " ";
+                    }
+
+                    print $fieldName;
+                    print '</th>';
+                }
+
+                foreach ($info3 as $record) {
+                    print "<tr>";
+                    foreach ($photoFields as $field) {
+                        print '<td>';
+                        print $record[$field];
+                        print '</td>';
+                    }
+                    print "</tr>";
+                }
+
+                print '</table>';
+            }
 
             print '</section>';
             ?>
