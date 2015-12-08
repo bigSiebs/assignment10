@@ -434,7 +434,7 @@ if (isset($_POST['btnSubmit'])) {
         $messageAdmin = "<h2>A new activity has been submitted to UVM diddit</h2>";
         $messageAdmin .= "<p>" . $user . " submitted " . $activityName . ".</p>";
         $messageAdmin .= "<p>Head over to the ";
-        $messageAdmin .= '<a href="https://jsiebert.w3.uvm.edu/cs148develop/assignment10/admin/approve.php">approve</a> page to confirm this submission.</p>';
+        $messageAdmin .= '<a href="https://jsiebert.w3.uvm.edu/cs148/assignment10/admin/approve.php">approve</a> page to confirm this submission.</p>';
 
         // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
         //
@@ -445,7 +445,7 @@ if (isset($_POST['btnSubmit'])) {
         $to = $email; // the person who filled out form
         $cc = ""; // admins
         $bcc = "";
-        $from = "UVM Activities <jsiebert@uvm.edu>";
+        $from = "UVM diddit <jsiebert@uvm.edu>";
 
         // subject of mail should match form
         $subject = "Thanks for contributing to UVM diddit!";
@@ -454,7 +454,7 @@ if (isset($_POST['btnSubmit'])) {
         $toAdmin = "jsiebert@uvm.edu"; // joe
         $ccAdmin = "aychu@uvm.edu"; // alan
         $bccAdmin = "";
-        $fromAdmin = "UVM Activities <jsiebert@uvm.edu>";
+        $fromAdmin = "UVM diddit <jsiebert@uvm.edu>";
 
         // subject of mail should match form
         $subjectAdmin = "New diddit submission from " . $user;

@@ -279,7 +279,7 @@ if (!isset($_POST['btnSubmit']) AND !$check) {
 //        }
 
             $message .= "<br><p>Thanks again!</p>";
-            $message .= "<br><p>The UVM Checkkit admin team</p>";
+            $message .= "<br><p>The UVM diddit admin team</p>";
 
 
             // %^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%^%
@@ -291,7 +291,7 @@ if (!isset($_POST['btnSubmit']) AND !$check) {
             $to = $email; // the person who filled out form
             $cc = ""; // admins
             $bcc = "";
-            $from = "UVM Chekkit <aychu@uvm.edu>";
+            $from = "UVM diddit <aychu@uvm.edu>";
 
             // subject of mail should match form
             $subject = "Thanks for submitting an image to UVM diddit!";

@@ -56,7 +56,7 @@ if (!adminCheck($thisDatabaseReader, $username)) {
 
         print "<p>The following submitted photos need to be approved:</p>";
 
-        print "<section>";
+        print '<section class="panel">';
         $pendingQuery = "SELECT pmkPhotoId, pmkActivityId, fldName, fldCaption, fldFileName, fnkSubmitNetId";
         $pendingQuery .= " FROM tblPhotos";
         $pendingQuery .= " INNER JOIN tblActivities ON fnkActivityId = pmkActivityId";
@@ -64,8 +64,6 @@ if (!adminCheck($thisDatabaseReader, $username)) {
         $pendingData = array(0);
 
         $pending = $thisDatabaseReader->select($pendingQuery, $pendingData, 1, 0, 0, 0, false, false);
-
-        print '<div class="panel">';
 
         if (!$pending) {
             print "<p>No photos are pending approval.";
@@ -94,8 +92,8 @@ if (!adminCheck($thisDatabaseReader, $username)) {
             // for loop to print each record in search query
             foreach ($pending as $record) {
                 $appendURL = '?activity=' . $record['pmkActivityId'];
-                $appendURL .= '&photo=' . $record['pmkPhotoId'];
-                $appendURL .= '&action=approve';
+                $appendURL .= '&amp;photo=' . $record['pmkPhotoId'];
+                $appendURL .= '&amp;action=approve';
 
                 // print the row
                 print '<tr>';
@@ -235,8 +233,8 @@ if (!adminCheck($thisDatabaseReader, $username)) {
         foreach ($photos as $photo) {
             $action = ($photo['fldApproved']) ? "unapprove" : "approve";
             $appendURL = '?activity=' . $activityID;
-            $appendURL .= '&photo=' . $photo['pmkPhotoId'];
-            $appendURL .= '&action=';
+            $appendURL .= '&amp;photo=' . $photo['pmkPhotoId'];
+            $appendURL .= '&amp;action=';
 
             $approvalLink = $appendURL . $action;
             $removalLink = $appendURL . 'remove';
@@ -278,5 +276,7 @@ if (!adminCheck($thisDatabaseReader, $username)) {
         print "</table>";
     }
 }
+
+print '</article>';
 
 include "../footer.php";
