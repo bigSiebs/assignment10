@@ -246,7 +246,7 @@ foreach ($info as $record) {
         
     }
     if ($record['fldURL'] != '') {
-        print '<li><b>URL:</b> <a href="' . $record['fldURL'] . '">Click here</a></li>';
+        print '<li><b>URL:</b> <a target="_blank" href="' . $record['fldURL'] . '">Click here</a></li>';
     }
     if ($record['fldDescription'] != "") {
         print '<li><b>Description:</b> ' . $record['fldDescription'] . '</li>';

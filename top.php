@@ -14,7 +14,7 @@ require_once('lib/validation-functions.php');
         <meta name="description" content="This site displays present and past student's favorite activities from when they were students at the University of Vermont. It's meant as a loose road map for current students and a source of nostalgia for alumni.">
 
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
+        
         <!--[if lt IE 9]>
         <script src="//html5shim.googlecode.com/sin/trunk/html5.js"></script>
         <![endif]-->
@@ -135,6 +135,10 @@ require_once('lib/validation-functions.php');
         $thisDatabaseAdmin = new Database($dbUserName, $whichPass, $dbName);
         ?>
 
+        <link rel="icon"
+              type="image/icon"
+              href="<?php print $path;?>images/icon_checkkit.png">
+        
         <link rel="stylesheet" href="<?php print $path; ?>css/styles.css"
               type="text/css" media="screen">
         <link rel="stylesheet" href="<?php print $path; ?>css/foundation.css" />
