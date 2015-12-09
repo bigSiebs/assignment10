@@ -26,9 +26,8 @@ if (isset($_GET['start']) AND ($_GET['start'] > 0
     $startRecord = 0;
 }
 
-print '<div>';
+print '<div class="row text-center">';
 print '<h4>Displaying records ';
-
 print ($startRecord + 1) . ' - ';
 if ($startRecord + $numberRecords > $total[0]['count']) {
     print $total[0]['count'];
@@ -36,7 +35,6 @@ if ($startRecord + $numberRecords > $total[0]['count']) {
     print $startRecord + $numberRecords;
 }
 print ' of ' . $total[0]['count'] . '</h4>';
-
 print '<ol class="inline-list no-bullet" id="nav-list">';
 print '<li';
 if ($startRecord - $numberRecords < 0) {
