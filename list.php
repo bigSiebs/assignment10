@@ -35,18 +35,18 @@ if ($startRecord + $numberRecords > $total[0]['count']) {
     print $startRecord + $numberRecords;
 }
 print ' of ' . $total[0]['count'] . '</h4>';
-print '<ol class="inline-list no-bullet" id="nav-list">';
-print '<li';
+print '<ol class="large-12 columns no-bullet">';
+print '<li class="large-6 columns';
 if ($startRecord - $numberRecords < 0) {
-    print ' class="unavailable"';
+    print ' unavailable';
 }
-print '><a href="?start=' . ($startRecord - $numberRecords) . '">';
+print '"><a href="?start=' . ($startRecord - $numberRecords) . '">';
 print 'Previous</a></li>';
-print '<li';
+print '<li class="large-6 columns';
 if ($startRecord + $numberRecords >= $total[0]['count']) {
-    print ' class="unavailable"';
+    print ' unavailable';
 }
-print '><a href="?start=' . ($startRecord + $numberRecords) . '">';
+print '"><a href="?start=' . ($startRecord + $numberRecords) . '">';
 print 'Next</a></li>';
 print '</ol>';
 print '</div>';
